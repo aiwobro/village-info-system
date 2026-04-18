@@ -1,33 +1,34 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import axios from 'axios'
+import { onMounted } from 'vue'
+import { useDataStore } from '../stores/data'
+import { useAuthStore } from '../stores/auth'
 
-const stats = ref({
-  villagers: 0,
-  assets: 0,
-  resources: 0,
-})
+const dataStore = useDataStore()
+const auth = useAuthStore()
 
-onMounted(async () => {
-  try {
-    const res = await axios.get('/api/v1/health')
-    console.log('API connected:', res.data)
-  } catch (e) {
-    console.log('API not yet connected')
-  }
+onMounted(() => {
+  dataStore.fetchStats()
 })
 </script>
 
 <template>
   <div class="home">
-    <h1>🏘️ 村庄信息管理系统</h1>
+    <div class="header">
+      <h1>🏘️ 村庄信息管理系统</h1>
+      <div class="user-info">
+        <span>欢迎，{{ auth.user?.full_name || auth.user?.username }}</span>
+        <el-button type="danger" size="small" @click="auth.logout(); $router.push('/login')">
+          退出
+        </el-button>
+      </div>
+    </div>
     <el-row :gutter="20" class="stats-row">
       <el-col :span="6">
         <el-card shadow="hover">
           <div class="stat-card">
             <el-icon class="stat-icon" color="#409eff"><User /></el-icon>
             <div class="stat-info">
-              <div class="stat-value">{{ stats.villagers }}</div>
+              <div class="stat-value">{{ dataStore.stats.villagers }}</div>
               <div class="stat-label">村民总数</div>
             </div>
           </div>
@@ -38,7 +39,7 @@ onMounted(async () => {
           <div class="stat-card">
             <el-icon class="stat-icon" color="#67c23a"><Box /></el-icon>
             <div class="stat-info">
-              <div class="stat-value">{{ stats.assets }}</div>
+              <div class="stat-value">{{ dataStore.stats.assets }}</div>
               <div class="stat-label">资产数量</div>
             </div>
           </div>
@@ -49,7 +50,7 @@ onMounted(async () => {
           <div class="stat-card">
             <el-icon class="stat-icon" color="#e6a23c"><Grid /></el-icon>
             <div class="stat-info">
-              <div class="stat-value">{{ stats.resources }}</div>
+              <div class="stat-value">{{ dataStore.stats.resources }}</div>
               <div class="stat-label">资源数量</div>
             </div>
           </div>
@@ -58,10 +59,10 @@ onMounted(async () => {
       <el-col :span="6">
         <el-card shadow="hover">
           <div class="stat-card">
-            <el-icon class="stat-icon" color="#f56c6c"><UserFilled /></el-icon>
+            <el-icon class="stat-icon" color="#f56c6c"><LocationInformation /></el-icon>
             <div class="stat-info">
-              <div class="stat-value">0</div>
-              <div class="stat-label">银行账号</div>
+              <div class="stat-value">{{ dataStore.stats.villages }}</div>
+              <div class="stat-label">村庄数量</div>
             </div>
           </div>
         </el-card>
@@ -71,31 +72,38 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.home h1 {
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   margin-bottom: 24px;
-  color: #303133;
 }
-
+.header h1 {
+  color: #303133;
+  margin: 0;
+}
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #606266;
+}
 .stats-row {
   margin-bottom: 20px;
 }
-
 .stat-card {
   display: flex;
   align-items: center;
   gap: 16px;
 }
-
 .stat-icon {
   font-size: 48px;
 }
-
 .stat-value {
   font-size: 32px;
   font-weight: bold;
   color: #303133;
 }
-
 .stat-label {
   color: #909399;
   font-size: 14px;

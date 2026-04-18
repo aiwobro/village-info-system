@@ -1,0 +1,159 @@
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import { bankAccountApi } from '../api/bankAccount'
+import { ElMessage, ElMessageBox } from 'element-plus'
+
+const list = ref<any[]>([])
+const loading = ref(false)
+const dialogVisible = ref(false)
+const isEdit = ref(false)
+const formRef = ref()
+
+const form = ref({
+  id: null as number | null,
+  villager_id: null as number | null,
+  account_holder: '',
+  bank_name: '',
+  bank_branch: '',
+  account_number_encrypted: '',
+  account_type: '',
+  is_active: 1,
+  remark: '',
+})
+
+const rules = {
+  villager_id: [{ required: true, message: '请选择关联村民', trigger: 'change' }],
+  account_holder: [{ required: true, message: '请输入开户名', trigger: 'blur' }],
+}
+
+const fetchList = async () => {
+  loading.value = true
+  try {
+    list.value = await bankAccountApi.getAll({ limit: 100 }) as any[]
+  } catch (e) {
+    console.error(e)
+  } finally {
+    loading.value = false
+  }
+}
+
+const openAdd = () => {
+  isEdit.value = false
+  form.value = { id: null, villager_id: null, account_holder: '', bank_name: '', bank_branch: '', account_number_encrypted: '', account_type: '', is_active: 1, remark: '' }
+  dialogVisible.value = true
+}
+
+const openEdit = (row: any) => {
+  isEdit.value = true
+  form.value = { ...row }
+  dialogVisible.value = true
+}
+
+const handleSubmit = async () => {
+  if (!formRef.value) return
+  await formRef.value.validate(async (valid: boolean) => {
+    if (!valid) return
+    try {
+      if (isEdit.value && form.value.id) {
+        await bankAccountApi.update(form.value.id, form.value)
+        ElMessage.success('更新成功')
+      } else {
+        await bankAccountApi.create(form.value)
+        ElMessage.success('创建成功')
+      }
+      dialogVisible.value = false
+      fetchList()
+    } catch (e) {}
+  })
+}
+
+const handleDelete = async (id: number) => {
+  try {
+    await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
+    await bankAccountApi.delete(id)
+    ElMessage.success('删除成功')
+    fetchList()
+  } catch (e) {}
+}
+
+onMounted(fetchList)
+</script>
+
+<template>
+  <div class="page">
+    <div class="toolbar">
+      <h2>💳 银行账号</h2>
+      <el-button type="primary" @click="openAdd">新增账号</el-button>
+    </div>
+
+    <el-table :data="list" v-loading="loading" stripe>
+      <el-table-column prop="villager_id" label="村民ID" width="100" />
+      <el-table-column prop="account_holder" label="开户名" />
+      <el-table-column prop="bank_name" label="开户行" />
+      <el-table-column prop="bank_branch" label="支行" />
+      <el-table-column prop="account_number_encrypted" label="卡号" />
+      <el-table-column prop="account_type" label="账户类型" />
+      <el-table-column prop="is_active" label="状态" width="80">
+        <template #default="{ row }">
+          {{ row.is_active === 1 ? '有效' : '无效' }}
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" width="180">
+        <template #default="{ row }">
+          <el-button size="small" @click="openEdit(row)">编辑</el-button>
+          <el-button size="small" type="danger" @click="handleDelete(row.id)">删除</el-button>
+        </template>
+      </el-table-column>
+    </el-table>
+
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑账号' : '新增账号'" width="600px">
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
+        <el-form-item label="村民ID" prop="villager_id">
+          <el-input-number v-model="form.villager_id" :min="1" style="width: 100%" />
+        </el-form-item>
+        <el-form-item label="开户名" prop="account_holder">
+          <el-input v-model="form.account_holder" />
+        </el-form-item>
+        <el-form-item label="开户行">
+          <el-input v-model="form.bank_name" />
+        </el-form-item>
+        <el-form-item label="支行">
+          <el-input v-model="form.bank_branch" />
+        </el-form-item>
+        <el-form-item label="卡号">
+          <el-input v-model="form.account_number_encrypted" />
+        </el-form-item>
+        <el-form-item label="账户类型">
+          <el-select v-model="form.account_type" style="width: 100%">
+            <el-option label="个人账户" value="个人账户" />
+            <el-option label="对公账户" value="对公账户" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="状态">
+          <el-radio-group v-model="form.is_active">
+            <el-radio :label="1">有效</el-radio>
+            <el-radio :label="0">无效</el-radio>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item label="备注">
+          <el-input v-model="form.remark" type="textarea" :rows="2" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleSubmit">确定</el-button>
+      </template>
+    </el-dialog>
+  </div>
+</template>
+
+<style scoped>
+.page { padding: 0; }
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.toolbar h2 { margin: 0; }
+</style>

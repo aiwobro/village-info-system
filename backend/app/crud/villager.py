@@ -1,0 +1,55 @@
+from sqlalchemy.orm import Session
+from sqlalchemy import or_
+from app.models.villager import Villager
+from app.schemas.villager import VillagerCreate, VillagerUpdate
+
+def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None):
+    query = db.query(Villager)
+    if search:
+        query = query.filter(
+            or_(
+                Villager.name.ilike(f"%{search}%"),
+                Villager.id_card.ilike(f"%{search}%"),
+                Villager.household_id.ilike(f"%{search}%"),
+            )
+        )
+    return query.offset(skip).limit(limit).all()
+
+def get_count(db: Session, search: str = None):
+    query = db.query(Villager)
+    if search:
+        query = query.filter(
+            or_(
+                Villager.name.ilike(f"%{search}%"),
+                Villager.id_card.ilike(f"%{search}%"),
+            )
+        )
+    return query.count()
+
+def get_by_id(db: Session, id: int):
+    return db.query(Villager).filter(Villager.id == id).first()
+
+def create(db: Session, obj: VillagerCreate):
+    db_obj = Villager(**obj.model_dump())
+    db.add(db_obj)
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+def update(db: Session, id: int, obj: VillagerUpdate):
+    db_obj = get_by_id(db, id)
+    if not db_obj:
+        return None
+    for key, value in obj.model_dump(exclude_unset=True).items():
+        setattr(db_obj, key, value)
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+def delete(db: Session, id: int):
+    db_obj = get_by_id(db, id)
+    if not db_obj:
+        return False
+    db.delete(db_obj)
+    db.commit()
+    return True

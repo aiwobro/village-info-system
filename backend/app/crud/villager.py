@@ -3,8 +3,11 @@ from app.models.villager import Villager
 from app.schemas.villager import VillagerCreate, VillagerUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Villager).offset(skip).limit(limit).all()
+def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None):
+    q = db.query(Villager)
+    if search:
+        q = q.filter(Villager.name.contains(search))
+    return q.offset(skip).limit(limit).all()
 
 
 def get_by_id(db: Session, id: int):

@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import { useAuthStore } from './stores/auth'
 import Sidebar from './components/Sidebar.vue'
+
+const auth = useAuthStore()
 </script>
 
 <template>
   <div class="app-container">
-    <Sidebar />
-    <main class="main-content">
+    <Sidebar v-if="auth.token" />
+    <main class="main-content" :class="{ 'full-width': !auth.token }">
       <RouterView />
     </main>
   </div>
@@ -34,5 +37,9 @@ html, body, #app {
   padding: 24px;
   overflow-y: auto;
   background: #f5f7fa;
+}
+
+.main-content.full-width {
+  max-width: 100%;
 }
 </style>

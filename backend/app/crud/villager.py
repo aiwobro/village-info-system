@@ -37,3 +37,10 @@ def delete(db: Session, id: int):
     db.delete(db_obj)
     db.commit()
     return True
+
+
+def get_count(db: Session, search: str = None):
+    q = db.query(Villager)
+    if search:
+        q = q.filter(Villager.name.contains(search))
+    return q.count()

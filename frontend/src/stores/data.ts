@@ -19,23 +19,22 @@ export const useDataStore = defineStore('data', () => {
 
   const fetchStats = async () => {
     try {
-      const [vCount, aCount, rCount] = await Promise.all([
-        villagerApi.getCount(),
-        assetApi.getCount(),
-        resourceApi.getCount(),
+      const [hhData, villagerData, assetData, resourceData] = await Promise.all([
+        householdApi.getAll({ limit: 1 }) as Promise<any>,
+        villagerApi.getAll({ limit: 1 }) as Promise<any>,
+        assetApi.getAll({ limit: 1, search: undefined }) as Promise<any>,
+        resourceApi.getAll({ limit: 1, search: undefined }) as Promise<any>,
       ])
-      // 获取总数需要单独查
-      const [avAll, nvAll, hhAll] = await Promise.all([
-        adminVillageApi.getAll({ limit: 1000 }) as Promise<any[]>,
-        naturalVillageApi.getAll({ limit: 1000 }) as Promise<any[]>,
-        householdApi.getAll({ limit: 1000 }) as Promise<any[]>,
+      const [avAll, nvAll] = await Promise.all([
+        adminVillageApi.getAll({ limit: 1 }) as Promise<any>,
+        naturalVillageApi.getAll({ limit: 1 }) as Promise<any>,
       ])
-      stats.value.adminVillages = avAll.length
-      stats.value.naturalVillages = nvAll.length
-      stats.value.households = hhAll.length
-      stats.value.villagers = (vCount as any).count
-      stats.value.assets = (aCount as any).count
-      stats.value.resources = (rCount as any).count
+      stats.value.adminVillages = avAll.total
+      stats.value.naturalVillages = nvAll.total
+      stats.value.households = hhData.total
+      stats.value.villagers = villagerData.total
+      stats.value.assets = assetData.total
+      stats.value.resources = resourceData.total
     } catch (e) {
       console.error('Failed to fetch stats', e)
     }

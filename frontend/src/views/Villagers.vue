@@ -36,8 +36,8 @@ const importTransform = (record: any) => {
 
 const openImport = async () => {
   importDialogVisible.value = true
-  const hhs = await householdApi.getAll({ limit: 1000 }) as any[]
-  importHouseholds.value = hhs
+  const hhs = await householdApi.getAll({ limit: 1000 }) as any
+  importHouseholds.value = hhs.items || []
 }
 
 const list = ref<any[]>([])
@@ -74,18 +74,17 @@ const fetchList = async () => {
   loading.value = true
   try {
     const skip = (page.value - 1) * pageSize.value
-    const [data, countData, hhs, nvs, avs] = await Promise.all([
+    const [data, hhs, nvs, avs] = await Promise.all([
       villagerApi.getAll({ skip, limit: pageSize.value, search: search.value }),
-      villagerApi.getCount(search.value),
-      householdApi.getAll({ limit: 1000 }) as Promise<any[]>,
-      naturalVillageApi.getAll({ limit: 1000 }) as Promise<any[]>,
-      adminVillageApi.getAll({ limit: 100 }) as Promise<any[]>,
+      householdApi.getAll({ limit: 1000 }) as Promise<any>,
+      naturalVillageApi.getAll({ limit: 1000 }) as Promise<any>,
+      adminVillageApi.getAll({ limit: 100 }) as Promise<any>,
     ])
-    households.value = hhs
-    list.value = (data as any[]).map(v => {
-      const hh = hhs.find((h: any) => h.id === v.household_id)
-      const nv = hh ? nvs.find((n: any) => n.id === hh.natural_village_id) : null
-      const av = nv ? avs.find((a: any) => a.id === nv.admin_village_id) : null
+    households.value = hhs.items || []
+    list.value = (data.items || []).map(v => {
+      const hh = households.value.find((h: any) => h.id === v.household_id)
+      const nv = hh ? (nvs.items || []).find((n: any) => n.id === hh.natural_village_id) : null
+      const av = nv ? (avs.items || []).find((a: any) => a.id === nv.admin_village_id) : null
       return {
         ...v,
         household_no: hh?.household_no || '-',
@@ -93,7 +92,7 @@ const fetchList = async () => {
         admin_village_name: av?.name || '-',
       }
     })
-    total.value = (countData as any).count
+    total.value = data.total || 0
   } catch (e) {
     console.error(e)
   } finally {

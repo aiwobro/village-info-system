@@ -23,7 +23,6 @@ const importTransform = (record: any) => {
     )
     if (found) record.villager_id = found.id
   }
-  // 把"主联系方式"的文字转成布尔值
   if (record.is_primary !== undefined) {
     if (String(record.is_primary).toLowerCase() === '是' || String(record.is_primary) === '1' || String(record.is_primary).toLowerCase() === 'true') {
       record.is_primary = true
@@ -36,12 +35,15 @@ const importTransform = (record: any) => {
 
 const openImport = async () => {
   importDialogVisible.value = true
-  const vs = await villagerApi.getAll({ limit: 1000 }) as any[]
-  importVillagers.value = vs
+  const res = await villagerApi.getAll({ limit: 1000 }) as any
+  importVillagers.value = res.items || []
 }
 
 const list = ref<any[]>([])
 const villagers = ref<any[]>([])
+const total = ref(0)
+const page = ref(1)
+const pageSize = ref(20)
 const loading = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
@@ -74,15 +76,17 @@ const rules = {
 const fetchList = async () => {
   loading.value = true
   try {
-    const [contacts, villagerList] = await Promise.all([
-      contactApi.getAll({ limit: 1000 }) as Promise<any[]>,
-      villagerApi.getAll({ limit: 1000 }) as Promise<any[]>,
+    const skip = (page.value - 1) * pageSize.value
+    const [data, villagerData] = await Promise.all([
+      contactApi.getAll({ skip, limit: pageSize.value }),
+      villagerApi.getAll({ limit: 1000 }) as Promise<any>,
     ])
-    villagers.value = villagerList
-    list.value = contacts.map(c => ({
+    villagers.value = villagerData.items || []
+    list.value = (data.items || []).map(c => ({
       ...c,
-      villager_name: villagerList.find((v: any) => v.id === c.villager_id)?.name || '-',
+      villager_name: villagers.value.find((v: any) => v.id === c.villager_id)?.name || '-',
     }))
+    total.value = data.total || 0
   } catch (e) {
     console.error(e)
   } finally {
@@ -160,6 +164,17 @@ onMounted(fetchList)
       </el-table-column>
     </el-table>
 
+    <el-pagination
+      v-model:current-page="page"
+      v-model:page-size="pageSize"
+      :total="total"
+      :page-sizes="[10, 20, 50, 100]"
+      layout="total, sizes, prev, pager, next"
+      @current-change="fetchList"
+      @size-change="() => { page = 1; fetchList(); }"
+      style="margin-top: 16px;"
+    />
+
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑联系方式' : '新增联系方式'" width="500px">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="110px">
         <el-form-item label="村民" prop="villager_id">
@@ -176,10 +191,10 @@ onMounted(fetchList)
           <el-input v-model="form.value" />
         </el-form-item>
         <el-form-item label="主联系方式">
-          <el-radio-group v-model="form.is_primary">
+          <radio-group v-model="form.is_primary">
             <el-radio :label="1">是</el-radio>
             <el-radio :label="0">否</el-radio>
-          </el-radio-group>
+          </radio-group>
         </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="form.remark" type="textarea" :rows="2" />

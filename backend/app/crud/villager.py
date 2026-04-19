@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from app.models.villager import Villager
 from app.schemas.villager import VillagerCreate, VillagerUpdate
 
@@ -7,7 +8,9 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None):
     q = db.query(Villager)
     if search:
         q = q.filter(Villager.name.contains(search))
-    return q.offset(skip).limit(limit).all()
+    total = q.count()
+    items = q.offset(skip).limit(limit).all()
+    return {"items": items, "total": total}
 
 
 def get_by_id(db: Session, id: int):
@@ -40,10 +43,3 @@ def delete(db: Session, id: int):
     db.delete(db_obj)
     db.commit()
     return True
-
-
-def get_count(db: Session, search: str = None):
-    q = db.query(Villager)
-    if search:
-        q = q.filter(Villager.name.contains(search))
-    return q.count()

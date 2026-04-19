@@ -18,10 +18,6 @@ def get_all(
 ):
     return crud.get_all(db, skip=skip, limit=limit, search=search)
 
-@router.get("/count")
-def get_count(search: str = Query(None), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return {"count": crud.get_count(db, search=search)}
-
 @router.get("/{id}", response_model=ResourceOut)
 def get_by_id(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     obj = crud.get_by_id(db, id)

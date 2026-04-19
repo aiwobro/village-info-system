@@ -25,7 +25,6 @@ const importTransform = (record: any) => {
     )
     if (found) record.villager_id = found.id
   }
-  // 把"状态"的文字转成布尔值
   if (record.is_active !== undefined) {
     if (String(record.is_active).toLowerCase() === '是' || String(record.is_active) === '1' || String(record.is_active).toLowerCase() === 'true' || String(record.is_active) === '正常' || String(record.is_active) === '激活') {
       record.is_active = true
@@ -38,12 +37,15 @@ const importTransform = (record: any) => {
 
 const openImport = async () => {
   importDialogVisible.value = true
-  const vs = await villagerApi.getAll({ limit: 1000 }) as any[]
-  importVillagers.value = vs
+  const res = await villagerApi.getAll({ limit: 1000 }) as any
+  importVillagers.value = res.items || []
 }
 
 const list = ref<any[]>([])
 const villagers = ref<any[]>([])
+const total = ref(0)
+const page = ref(1)
+const pageSize = ref(20)
 const loading = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
@@ -69,15 +71,17 @@ const rules = {
 const fetchList = async () => {
   loading.value = true
   try {
-    const [accounts, villagerList] = await Promise.all([
-      bankAccountApi.getAll({ limit: 1000 }) as Promise<any[]>,
-      villagerApi.getAll({ limit: 1000 }) as Promise<any[]>,
+    const skip = (page.value - 1) * pageSize.value
+    const [data, villagerData] = await Promise.all([
+      bankAccountApi.getAll({ skip, limit: pageSize.value }),
+      villagerApi.getAll({ limit: 1000 }) as Promise<any>,
     ])
-    villagers.value = villagerList
-    list.value = accounts.map(b => ({
+    villagers.value = villagerData.items || []
+    list.value = (data.items || []).map(b => ({
       ...b,
-      villager_name: villagerList.find((v: any) => v.id === b.villager_id)?.name || '-',
+      villager_name: villagers.value.find((v: any) => v.id === b.villager_id)?.name || '-',
     }))
+    total.value = data.total || 0
   } catch (e) {
     console.error(e)
   } finally {
@@ -155,6 +159,17 @@ onMounted(fetchList)
         </template>
       </el-table-column>
     </el-table>
+
+    <el-pagination
+      v-model:current-page="page"
+      v-model:page-size="pageSize"
+      :total="total"
+      :page-sizes="[10, 20, 50, 100]"
+      layout="total, sizes, prev, pager, next"
+      @current-change="fetchList"
+      @size-change="() => { page = 1; fetchList(); }"
+      style="margin-top: 16px;"
+    />
 
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑账号' : '新增账号'" width="600px">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">

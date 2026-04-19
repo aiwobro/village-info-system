@@ -12,15 +12,9 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None):
                 Asset.code.ilike(f"%{search}%"),
             )
         )
-    return query.offset(skip).limit(limit).all()
-
-def get_count(db: Session, search: str = None):
-    query = db.query(Asset)
-    if search:
-        query = query.filter(
-            or_(Asset.name.ilike(f"%{search}%"), Asset.code.ilike(f"%{search}%"))
-        )
-    return query.count()
+    total = query.count()
+    items = query.offset(skip).limit(limit).all()
+    return {"items": items, "total": total}
 
 def get_by_id(db: Session, id: int):
     return db.query(Asset).filter(Asset.id == id).first()

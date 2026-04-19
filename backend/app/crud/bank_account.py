@@ -4,7 +4,9 @@ from app.schemas.bank_account import BankAccountCreate, BankAccountUpdate
 
 
 def get_all(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(BankAccount).offset(skip).limit(limit).all()
+    items = db.query(BankAccount).offset(skip).limit(limit).all()
+    total = db.query(BankAccount).count()
+    return {"items": items, "total": total}
 
 
 def get_by_id(db: Session, id: int):

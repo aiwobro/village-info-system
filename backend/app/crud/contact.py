@@ -4,7 +4,9 @@ from app.schemas.contact import ContactCreate, ContactUpdate
 
 
 def get_all(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(Contact).offset(skip).limit(limit).all()
+    items = db.query(Contact).offset(skip).limit(limit).all()
+    total = db.query(Contact).count()
+    return {"items": items, "total": total}
 
 
 def get_by_id(db: Session, id: int):

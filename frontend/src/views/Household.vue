@@ -13,11 +13,9 @@ const importFields = [
   { label: '地址', field: 'address' },
 ]
 
-// 用于导入时把村名转成ID
 const importNaturalVillages = ref<any[]>([])
 
 const importTransform = (record: any) => {
-  // 所属自然村：把村名转成ID
   if (record.natural_village_id && typeof record.natural_village_id === 'string') {
     const found = importNaturalVillages.value.find(
       (n: any) => n.name === record.natural_village_id || String(n.id) === record.natural_village_id
@@ -29,6 +27,9 @@ const importTransform = (record: any) => {
 
 const list = ref<any[]>([])
 const naturalVillages = ref<any[]>([])
+const total = ref(0)
+const page = ref(1)
+const pageSize = ref(20)
 const loading = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
@@ -50,21 +51,23 @@ const rules = {
 const fetchList = async () => {
   loading.value = true
   try {
-    const [households, naturalVills, adminVills] = await Promise.all([
-      householdApi.getAll({ limit: 1000 }) as Promise<any[]>,
-      naturalVillageApi.getAll({ limit: 1000 }) as Promise<any[]>,
-      adminVillageApi.getAll({ limit: 100 }) as Promise<any[]>,
+    const skip = (page.value - 1) * pageSize.value
+    const [data, nvs, avs] = await Promise.all([
+      householdApi.getAll({ skip, limit: pageSize.value }),
+      naturalVillageApi.getAll({ limit: 1000 }) as Promise<any>,
+      adminVillageApi.getAll({ limit: 100 }) as Promise<any>,
     ])
-    naturalVillages.value = naturalVills
-    list.value = households.map(h => {
-      const nv = naturalVills.find((n: any) => n.id === h.natural_village_id)
-      const av = nv ? adminVills.find((a: any) => a.id === nv.admin_village_id) : null
+    naturalVillages.value = nvs.items || []
+    list.value = (data.items || []).map(h => {
+      const nv = naturalVillages.value.find((n: any) => n.id === h.natural_village_id)
+      const av = nv ? (avs.items || []).find((a: any) => a.id === nv.admin_village_id) : null
       return {
         ...h,
         natural_village_name: nv?.name || '-',
         admin_village_name: av?.name || '-',
       }
     })
+    total.value = data.total || 0
   } catch (e) {
     console.error(e)
   } finally {
@@ -113,9 +116,8 @@ const handleDelete = async (row: any) => {
 
 const openImport = async () => {
   importDialogVisible.value = true
-  // 提前加载自然村列表，用于村名→ID转换
-  const nvs = await naturalVillageApi.getAll({ limit: 1000 }) as any[]
-  importNaturalVillages.value = nvs
+  const nvs = await naturalVillageApi.getAll({ limit: 1000 }) as any
+  importNaturalVillages.value = nvs.items || []
 }
 
 onMounted(fetchList)
@@ -143,6 +145,17 @@ onMounted(fetchList)
         </template>
       </el-table-column>
     </el-table>
+
+    <el-pagination
+      v-model:current-page="page"
+      v-model:page-size="pageSize"
+      :total="total"
+      :page-sizes="[10, 20, 50, 100]"
+      layout="total, sizes, prev, pager, next"
+      @current-change="fetchList"
+      @size-change="() => { page = 1; fetchList(); }"
+      style="margin-top: 16px;"
+    />
 
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑户' : '新增户'" width="600px">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">

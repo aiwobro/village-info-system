@@ -57,12 +57,9 @@ const fetchList = async () => {
   loading.value = true
   try {
     const skip = (page.value - 1) * pageSize.value
-    const [data, countData] = await Promise.all([
-      assetApi.getAll({ skip, limit: pageSize.value, search: search.value }),
-      assetApi.getCount(search.value),
-    ])
-    list.value = data as any[]
-    total.value = (countData as any).count
+    const data: any = await assetApi.getAll({ skip, limit: pageSize.value, search: search.value })
+    list.value = data.items || []
+    total.value = data.total || 0
   } catch (e) {
     console.error(e)
   } finally {

@@ -2,6 +2,24 @@
 import { ref, onMounted, watch } from 'vue'
 import { assetApi } from '../api/asset'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import ImportDialog from '../components/ImportDialog.vue'
+
+const importDialogVisible = ref(false)
+const importFields = [
+  { label: '资产名称', field: 'name', required: true },
+  { label: '资产编码', field: 'code' },
+  { label: '资产类型', field: 'asset_type' },
+  { label: '位置', field: 'location' },
+  { label: '面积', field: 'area' },
+  { label: '数量', field: 'quantity' },
+  { label: '单位', field: 'unit' },
+  { label: '购置日期', field: 'purchase_date' },
+  { label: '购置价格', field: 'purchase_price' },
+  { label: '当前估值', field: 'current_value' },
+  { label: '状态', field: 'status' },
+  { label: '描述', field: 'description' },
+  { label: '备注', field: 'remark' },
+]
 
 const list = ref<any[]>([])
 const total = ref(0)
@@ -104,7 +122,10 @@ onMounted(fetchList)
   <div class="page">
     <div class="toolbar">
       <h2>📦 资产管理</h2>
-      <el-button type="primary" @click="openAdd">新增资产</el-button>
+      <div style="display: flex; gap: 8px;">
+        <el-button @click="importDialogVisible = true">批量导入</el-button>
+        <el-button type="primary" @click="openAdd">新增资产</el-button>
+      </div>
     </div>
 
     <div class="search-bar">
@@ -212,6 +233,14 @@ onMounted(fetchList)
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <ImportDialog
+      v-model="importDialogVisible"
+      title="批量导入资产"
+      :fields="importFields"
+      :api="assetApi"
+      @success="fetchList"
+    />
   </div>
 </template>
 

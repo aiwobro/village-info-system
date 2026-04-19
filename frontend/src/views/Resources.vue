@@ -2,6 +2,21 @@
 import { ref, onMounted, watch } from 'vue'
 import { resourceApi } from '../api/resource'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import ImportDialog from '../components/ImportDialog.vue'
+
+const importDialogVisible = ref(false)
+const importFields = [
+  { label: '资源名称', field: 'name', required: true },
+  { label: '资源编码', field: 'code' },
+  { label: '资源类型', field: 'resource_type' },
+  { label: '位置', field: 'location' },
+  { label: '面积', field: 'area' },
+  { label: '储量', field: 'reserves' },
+  { label: '状态', field: 'status' },
+  { label: '开发利用情况', field: 'development' },
+  { label: '描述', field: 'description' },
+  { label: '备注', field: 'remark' },
+]
 
 const list = ref<any[]>([])
 const total = ref(0)
@@ -100,7 +115,10 @@ onMounted(fetchList)
   <div class="page">
     <div class="toolbar">
       <h2>🌲 资源管理</h2>
-      <el-button type="primary" @click="openAdd">新增资源</el-button>
+      <div style="display: flex; gap: 8px;">
+        <el-button @click="importDialogVisible = true">批量导入</el-button>
+        <el-button type="primary" @click="openAdd">新增资源</el-button>
+      </div>
     </div>
 
     <div class="search-bar">
@@ -202,6 +220,14 @@ onMounted(fetchList)
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <ImportDialog
+      v-model="importDialogVisible"
+      title="批量导入资源"
+      :fields="importFields"
+      :api="resourceApi"
+      @success="fetchList"
+    />
   </div>
 </template>
 

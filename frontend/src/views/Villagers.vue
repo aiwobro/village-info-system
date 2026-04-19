@@ -22,6 +22,24 @@ const importFields = [
   { label: '备注', field: 'remark' },
 ]
 
+const importHouseholds = ref<any[]>([])
+
+const importTransform = (record: any) => {
+  if (record.household_id && typeof record.household_id === 'string') {
+    const found = importHouseholds.value.find(
+      (h: any) => h.household_no === record.household_id || String(h.id) === record.household_id
+    )
+    if (found) record.household_id = found.id
+  }
+  return record
+}
+
+const openImport = async () => {
+  importDialogVisible.value = true
+  const hhs = await householdApi.getAll({ limit: 1000 }) as any[]
+  importHouseholds.value = hhs
+}
+
 const list = ref<any[]>([])
 const households = ref<any[]>([])
 const total = ref(0)
@@ -135,7 +153,7 @@ onMounted(fetchList)
     <div class="toolbar">
       <h2>👥 村民管理</h2>
       <div style="display: flex; gap: 8px;">
-        <el-button @click="importDialogVisible = true">批量导入</el-button>
+        <el-button @click="openImport">批量导入</el-button>
         <el-button type="primary" @click="openAdd">新增村民</el-button>
       </div>
     </div>
@@ -250,6 +268,7 @@ onMounted(fetchList)
       title="批量导入村民"
       :fields="importFields"
       :api="villagerApi"
+      :transform="importTransform"
       @success="fetchList"
     />
   </div>

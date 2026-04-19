@@ -13,6 +13,7 @@ const props = defineProps<{
   title: string
   fields: Field[]
   api: any
+  transform?: (record: any) => any  // 可选：导入前转换字段（如把村名转成ID）
 }>()
 
 const emit = defineEmits<{
@@ -104,7 +105,8 @@ const handleConfirm = async () => {
     if (errors.length > 0 && errors[errors.length - 1].row === rowNum) continue
 
     try {
-      await (props as any).api.create(record)
+      const finalRecord = props.transform ? props.transform(record) : record
+      await (props as any).api.create(finalRecord)
       successCount++
     } catch (e: any) {
       const msg = e?.response?.data?.detail || e?.message || '导入失败'

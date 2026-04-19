@@ -14,6 +14,32 @@ const importFields = [
   { label: '备注', field: 'remark' },
 ]
 
+const importVillagers = ref<any[]>([])
+
+const importTransform = (record: any) => {
+  if (record.villager_id && typeof record.villager_id === 'string') {
+    const found = importVillagers.value.find(
+      (v: any) => v.name === record.villager_id || String(v.id) === record.villager_id
+    )
+    if (found) record.villager_id = found.id
+  }
+  // 把"主联系方式"的文字转成布尔值
+  if (record.is_primary !== undefined) {
+    if (String(record.is_primary).toLowerCase() === '是' || String(record.is_primary) === '1' || String(record.is_primary).toLowerCase() === 'true') {
+      record.is_primary = true
+    } else if (String(record.is_primary).toLowerCase() === '否' || String(record.is_primary) === '0' || String(record.is_primary).toLowerCase() === 'false') {
+      record.is_primary = false
+    }
+  }
+  return record
+}
+
+const openImport = async () => {
+  importDialogVisible.value = true
+  const vs = await villagerApi.getAll({ limit: 1000 }) as any[]
+  importVillagers.value = vs
+}
+
 const list = ref<any[]>([])
 const villagers = ref<any[]>([])
 const loading = ref(false)
@@ -111,7 +137,7 @@ onMounted(fetchList)
     <div class="toolbar">
       <h2>📞 联系方式</h2>
       <div style="display: flex; gap: 8px;">
-        <el-button @click="importDialogVisible = true">批量导入</el-button>
+        <el-button @click="openImport">批量导入</el-button>
         <el-button type="primary" @click="openAdd">新增联系方式</el-button>
       </div>
     </div>
@@ -170,6 +196,7 @@ onMounted(fetchList)
       title="批量导入联系方式"
       :fields="importFields"
       :api="contactApi"
+      :transform="importTransform"
       @success="fetchList"
     />
   </div>

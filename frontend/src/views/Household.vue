@@ -13,6 +13,20 @@ const importFields = [
   { label: '地址', field: 'address' },
 ]
 
+// 用于导入时把村名转成ID
+const importNaturalVillages = ref<any[]>([])
+
+const importTransform = (record: any) => {
+  // 所属自然村：把村名转成ID
+  if (record.natural_village_id && typeof record.natural_village_id === 'string') {
+    const found = importNaturalVillages.value.find(
+      (n: any) => n.name === record.natural_village_id || String(n.id) === record.natural_village_id
+    )
+    if (found) record.natural_village_id = found.id
+  }
+  return record
+}
+
 const list = ref<any[]>([])
 const naturalVillages = ref<any[]>([])
 const loading = ref(false)
@@ -97,6 +111,13 @@ const handleDelete = async (row: any) => {
   } catch (e) {}
 }
 
+const openImport = async () => {
+  importDialogVisible.value = true
+  // 提前加载自然村列表，用于村名→ID转换
+  const nvs = await naturalVillageApi.getAll({ limit: 1000 }) as any[]
+  importNaturalVillages.value = nvs
+}
+
 onMounted(fetchList)
 </script>
 
@@ -105,7 +126,7 @@ onMounted(fetchList)
     <div class="toolbar">
       <h2>🏠 户管理</h2>
       <div style="display: flex; gap: 8px;">
-        <el-button @click="importDialogVisible = true">批量导入</el-button>
+        <el-button @click="openImport">批量导入</el-button>
         <el-button type="primary" @click="openAdd">新增户</el-button>
       </div>
     </div>
@@ -148,6 +169,7 @@ onMounted(fetchList)
       title="批量导入户"
       :fields="importFields"
       :api="householdApi"
+      :transform="importTransform"
       @success="fetchList"
     />
   </div>

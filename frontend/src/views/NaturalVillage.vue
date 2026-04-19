@@ -14,6 +14,24 @@ const importFields = [
   { label: '描述', field: 'description' },
 ]
 
+const importAdminVillages = ref<any[]>([])
+
+const importTransform = (record: any) => {
+  if (record.admin_village_id && typeof record.admin_village_id === 'string') {
+    const found = importAdminVillages.value.find(
+      (a: any) => a.name === record.admin_village_id || String(a.id) === record.admin_village_id
+    )
+    if (found) record.admin_village_id = found.id
+  }
+  return record
+}
+
+const openImport = async () => {
+  importDialogVisible.value = true
+  const avs = await adminVillageApi.getAll({ limit: 100 }) as any[]
+  importAdminVillages.value = avs
+}
+
 const list = ref<any[]>([])
 const adminVillages = ref<any[]>([])
 const dialogVisible = ref(false)
@@ -101,7 +119,7 @@ onMounted(fetchList)
     <div class="toolbar">
       <h2>🏡 自然村管理</h2>
       <div style="display: flex; gap: 8px;">
-        <el-button @click="importDialogVisible = true">批量导入</el-button>
+        <el-button @click="openImport">批量导入</el-button>
         <el-button type="primary" @click="openAdd">新增自然村</el-button>
       </div>
     </div>
@@ -157,6 +175,7 @@ onMounted(fetchList)
       title="批量导入自然村"
       :fields="importFields"
       :api="naturalVillageApi"
+      :transform="importTransform"
       @success="fetchList"
     />
   </div>

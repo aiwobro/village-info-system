@@ -16,14 +16,14 @@ onMounted(() => {
     <div class="header">
       <h1>🏘️ 村庄信息管理系统</h1>
       <div class="user-info">
-        <span>欢迎，{{ auth.user?.full_name || auth.user?.username }}</span>
+        <span class="username">欢迎，{{ auth.user?.full_name || auth.user?.username }}</span>
         <el-button type="danger" size="small" @click="auth.logout(); $router.push('/login')">
           退出
         </el-button>
       </div>
     </div>
-    <el-row :gutter="20" class="stats-row">
-      <el-col :span="4">
+    <el-row :gutter="16" class="stats-row">
+      <el-col :xs="12" :sm="8" :md="4" :lg="4">
         <el-card shadow="hover">
           <div class="stat-card">
             <el-icon class="stat-icon" color="#409eff"><LocationInformation /></el-icon>
@@ -34,7 +34,7 @@ onMounted(() => {
           </div>
         </el-card>
       </el-col>
-      <el-col :span="4">
+      <el-col :xs="12" :sm="8" :md="4" :lg="4">
         <el-card shadow="hover">
           <div class="stat-card">
             <el-icon class="stat-icon" color="#909399"><OfficeBuilding /></el-icon>
@@ -45,7 +45,7 @@ onMounted(() => {
           </div>
         </el-card>
       </el-col>
-      <el-col :span="4">
+      <el-col :xs="12" :sm="8" :md="4" :lg="4">
         <el-card shadow="hover">
           <div class="stat-card">
             <el-icon class="stat-icon" color="#67c23a"><House /></el-icon>
@@ -56,7 +56,7 @@ onMounted(() => {
           </div>
         </el-card>
       </el-col>
-      <el-col :span="4">
+      <el-col :xs="12" :sm="8" :md="4" :lg="4">
         <el-card shadow="hover">
           <div class="stat-card">
             <el-icon class="stat-icon" color="#e6a23c"><User /></el-icon>
@@ -67,7 +67,7 @@ onMounted(() => {
           </div>
         </el-card>
       </el-col>
-      <el-col :span="4">
+      <el-col :xs="12" :sm="8" :md="4" :lg="4">
         <el-card shadow="hover">
           <div class="stat-card">
             <el-icon class="stat-icon" color="#f56c6c"><Box /></el-icon>
@@ -78,7 +78,7 @@ onMounted(() => {
           </div>
         </el-card>
       </el-col>
-      <el-col :span="4">
+      <el-col :xs="12" :sm="8" :md="4" :lg="4">
         <el-card shadow="hover">
           <div class="stat-card">
             <el-icon class="stat-icon" color="#909399"><Grid /></el-icon>
@@ -98,36 +98,75 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
+  padding-top: 56px; /* 移动端顶部导航栏高度 */
 }
 .header h1 {
   color: #303133;
   margin: 0;
+  font-size: 20px;
 }
 .user-info {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   color: #606266;
 }
+.username {
+  font-size: 13px;
+  white-space: nowrap;
+}
 .stats-row {
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 .stat-card {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  min-height: 72px;
 }
 .stat-icon {
-  font-size: 40px;
+  font-size: 32px;
+  flex-shrink: 0;
+}
+.stat-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
 }
 .stat-value {
-  font-size: 28px;
+  font-size: 24px;
   font-weight: bold;
   color: #303133;
+  line-height: 1.2;
 }
 .stat-label {
   color: #909399;
-  font-size: 14px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* 平板及以上 */
+@media (min-width: 768px) {
+  .header {
+    padding-top: 0;
+  }
+  .header h1 {
+    font-size: 24px;
+  }
+  .stat-card {
+    min-height: 80px;
+    gap: 16px;
+  }
+  .stat-icon {
+    font-size: 40px;
+  }
+  .stat-value {
+    font-size: 28px;
+  }
+  .stat-label {
+    font-size: 14px;
+  }
 }
 </style>

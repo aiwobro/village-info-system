@@ -50,6 +50,7 @@ const total = ref(0)
 const page = ref(1)
 const pageSize = ref(20)
 const loading = ref(false)
+const search = ref('')
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
@@ -76,8 +77,8 @@ const fetchList = async () => {
   try {
     const skip = (page.value - 1) * pageSize.value
     const [data, villagerData] = await Promise.all([
-      bankAccountApi.getAll({ skip, limit: pageSize.value }),
-      villagerApi.getAll({ limit: 1000 }) as Promise<any>,
+      bankAccountApi.getAll({ skip, limit: pageSize.value, search: search.value }),
+      villagerApi.getAll({ limit: 5000 }) as Promise<any>,
     ])
     villagers.value = villagerData.items || []
     list.value = (data.items || []).map(b => ({
@@ -123,12 +124,15 @@ const handleSubmit = async () => {
 }
 
 const handleDelete = async (id: number) => {
-  try {
-    await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
-    await bankAccountApi.delete(id)
-    ElMessage.success('删除成功')
-    fetchList()
-  } catch (e) {}
+  await ElMessageBox.confirm('确定要删除这条账号吗？', '提示', { type: 'warning' })
+  await bankAccountApi.delete(id)
+  ElMessage.success('删除成功')
+  fetchList()
+}
+
+const handleSearch = () => {
+  page.value = 1
+  fetchList()
 }
 
 onMounted(fetchList)
@@ -142,6 +146,11 @@ onMounted(fetchList)
         <el-button @click="openImport">批量导入</el-button>
         <el-button type="primary" @click="openAdd">新增账号</el-button>
       </div>
+    </div>
+
+    <div class="search-bar">
+      <el-input v-model="search" placeholder="搜索卡号/开户行/备注" style="width: 280px" @keyup.enter="handleSearch" />
+      <el-button type="primary" @click="handleSearch">搜索</el-button>
     </div>
 
     <el-table :data="list" v-loading="loading" stripe>

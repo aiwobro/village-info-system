@@ -16,8 +16,8 @@ def batch_create_api(obj: NaturalVillageBatchCreate, db: Session = Depends(get_d
 
 
 @router.get("")
-def get_all_api(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return get_all(db, skip=skip, limit=limit)
+def get_all_api(skip: int = 0, limit: int = 100, admin_village_id: int | None = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return get_all(db, skip=skip, limit=limit, admin_village_id=admin_village_id)
 
 
 @router.get("/{id}", response_model=NaturalVillageOut)

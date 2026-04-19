@@ -65,6 +65,10 @@ const openMembers = async (row: any) => {
   }
 }
 
+// 编辑弹窗中的成员
+const editMembers = ref<any[]>([])
+const newMemberForm = ref({ name: '', gender: '', id_card: '', relation_to_head: '本人', occupation: '', address: '' })
+
 const form = ref({
   id: null as number | null,
   household_no: '',
@@ -157,9 +161,12 @@ const openAdd = () => {
   dialogVisible.value = true
 }
 
-const openEdit = (row: any) => {
+const openEdit = async (row: any) => {
   isEdit.value = true
   form.value = { ...row }
+  // 加载该户成员
+  const res = await villagerApi.getAll({ household_id: row.id ?? undefined, limit: 500 }) as any
+  editMembers.value = res.items || []
   dialogVisible.value = true
 }
 
@@ -189,6 +196,33 @@ const handleDelete = async (row: any) => {
     ElMessage.success('删除成功')
     fetchList()
     fetchStats()
+  } catch (e) {}
+}
+
+const handleAddMember = async () => {
+  if (!newMemberForm.value.name) {
+    ElMessage.warning('请填写成员姓名')
+    return
+  }
+  try {
+    await villagerApi.create({ ...newMemberForm.value, household_id: form.value.id })
+    const res = await villagerApi.getAll({ household_id: form.value.id ?? undefined, limit: 500 }) as any
+    editMembers.value = res.items || []
+    newMemberForm.value = { name: '', gender: '', id_card: '', relation_to_head: '本人', occupation: '', address: '' }
+    fetchList()
+    ElMessage.success('添加成功')
+  } catch (e: any) {
+    ElMessage.error(e?.response?.data?.detail || '添加失败')
+  }
+}
+
+const handleDeleteMember = async (id: number) => {
+  try {
+    await ElMessageBox.confirm('确认删除该成员？', '提示', { type: 'warning' })
+    await villagerApi.delete(id)
+    editMembers.value = editMembers.value.filter(m => m.id !== id)
+    fetchList()
+    ElMessage.success('删除成功')
   } catch (e) {}
 }
 
@@ -280,6 +314,31 @@ onMounted(async () => {
         <el-form-item label="地址">
           <el-input v-model="form.address" />
         </el-form-item>
+
+        <!-- 家庭成员区块 -->
+        <el-divider content-position="left">家庭成员</el-divider>
+        <el-table :data="editMembers" size="small" stripe style="margin-bottom: 12px" max-height="250">
+          <el-table-column prop="name" label="姓名" />
+          <el-table-column prop="gender" label="性别" width="60" />
+          <el-table-column prop="id_card" label="身份证号" width="180" />
+          <el-table-column prop="relation_to_head" label="与户主关系" width="100" />
+          <el-table-column prop="occupation" label="职业" />
+          <el-table-column label="操作" width="80">
+            <template #default="{ row }">
+              <el-button size="small" type="danger" @click="handleDeleteMember(row.id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-row :gutter="8">
+          <el-col :span="4"><el-input v-model="newMemberForm.name" placeholder="姓名" size="small" /></el-col>
+          <el-col :span="3"><el-select v-model="newMemberForm.gender" size="small" style="width:100%">
+            <el-option label="男" value="男" /><el-option label="女" value="女" />
+          </el-select></el-col>
+          <el-col :span="6"><el-input v-model="newMemberForm.id_card" placeholder="身份证号" size="small" /></el-col>
+          <el-col :span="4"><el-input v-model="newMemberForm.relation_to_head" placeholder="与户主关系" size="small" /></el-col>
+          <el-col :span="4"><el-input v-model="newMemberForm.occupation" placeholder="职业" size="small" /></el-col>
+          <el-col :span="3"><el-button size="small" type="primary" @click="handleAddMember">添加</el-button></el-col>
+        </el-row>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>

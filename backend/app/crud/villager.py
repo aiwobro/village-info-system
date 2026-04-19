@@ -7,7 +7,10 @@ from app.schemas.villager import VillagerCreate, VillagerUpdate
 def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None, household_id: int = None):
     q = db.query(Villager)
     if search:
-        q = q.filter(Villager.name.contains(search))
+        q = q.filter(or_(
+            Villager.name.contains(search),
+            Villager.id_card.contains(search)
+        ))
     if household_id:
         q = q.filter(Villager.household_id == household_id)
     total = q.count()

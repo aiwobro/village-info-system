@@ -4,6 +4,8 @@ import { villagerApi } from '../api/villager'
 import { householdApi } from '../api/household'
 import { naturalVillageApi } from '../api/naturalVillage'
 import { adminVillageApi } from '../api/adminVillage'
+import { contactApi } from '../api/contact'
+import { bankAccountApi } from '../api/bankAccount'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ImportDialog from '../components/ImportDialog.vue'
 
@@ -51,6 +53,12 @@ const dialogVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
 
+// 编辑弹窗中的联系方式和银行账号
+const editContacts = ref<any[]>([])
+const editBanks = ref<any[]>([])
+const newContact = ref({ type: '', value: '', is_primary: 0, remark: '' })
+const newBank = ref({ bank_name: '', account_holder: '', account_number_encrypted: '', account_type: '', is_active: 1, remark: '' })
+
 const form = ref({
   id: null as number | null,
   name: '',
@@ -74,22 +82,32 @@ const fetchList = async () => {
   loading.value = true
   try {
     const skip = (page.value - 1) * pageSize.value
-    const [data, hhs, nvs, avs] = await Promise.all([
+    const [data, hhs, nvs, avs, contactsData, banksData] = await Promise.all([
       villagerApi.getAll({ skip, limit: pageSize.value, search: search.value }),
       householdApi.getAll({ limit: 5000 }) as Promise<any>,
       naturalVillageApi.getAll({ limit: 5000 }) as Promise<any>,
       adminVillageApi.getAll({ limit: 100 }) as Promise<any>,
+      contactApi.getAll({ limit: 5000 }) as Promise<any>,
+      bankAccountApi.getAll({ limit: 5000 }) as Promise<any>,
     ])
     households.value = hhs.items || []
+    const contacts = contactsData.items || []
+    const banks = banksData.items || []
     list.value = (data.items || []).map(v => {
       const hh = households.value.find((h: any) => h.id === v.household_id)
       const nv = hh ? (nvs.items || []).find((n: any) => n.id === hh.natural_village_id) : null
       const av = nv ? (avs.items || []).find((a: any) => a.id === nv.admin_village_id) : null
+      const villagerContacts = contacts.filter((c: any) => c.villager_id === v.id)
+      const villagerBanks = banks.filter((b: any) => b.villager_id === v.id)
+      const phones = villagerContacts.map((c: any) => c.value).filter(Boolean).join('、')
+      const bankInfo = villagerBanks.map((b: any) => b.bank_name + ' ' + b.account_number_encrypted?.slice(-4)).filter(Boolean).join('、')
       return {
         ...v,
         household_no: hh?.household_no || '-',
         natural_village_name: nv?.name || '-',
         admin_village_name: av?.name || '-',
+        phones: phones || '-',
+        bank_info: bankInfo || '-',
       }
     })
     total.value = data.total || 0
@@ -111,9 +129,16 @@ const openAdd = () => {
   dialogVisible.value = true
 }
 
-const openEdit = (row: any) => {
+const openEdit = async (row: any) => {
   isEdit.value = true
   form.value = { ...row }
+  // 加载该村民的联系方式和银行账号
+  const [contactsRes, banksRes] = await Promise.all([
+    contactApi.getAll({ villager_id: row.id, limit: 1000 }) as Promise<any>,
+    bankAccountApi.getAll({ villager_id: row.id, limit: 1000 }) as Promise<any>,
+  ])
+  editContacts.value = contactsRes.items || []
+  editBanks.value = banksRes.items || []
   dialogVisible.value = true
 }
 
@@ -144,6 +169,60 @@ const handleDelete = async (id: number) => {
   } catch (e) {}
 }
 
+const handleDeleteContact = async (id: number) => {
+  try {
+    await ElMessageBox.confirm('确认删除该联系方式？', '提示', { type: 'warning' })
+    await contactApi.delete(id)
+    editContacts.value = editContacts.value.filter(c => c.id !== id)
+    fetchList()
+    ElMessage.success('删除成功')
+  } catch (e) {}
+}
+
+const handleAddContact = async () => {
+  if (!newContact.value.type || !newContact.value.value) {
+    ElMessage.warning('请填写类型和联系方式')
+    return
+  }
+  try {
+    await contactApi.create({ ...newContact.value, villager_id: form.value.id })
+    const res = await contactApi.getAll({ villager_id: form.value.id ?? undefined, limit: 1000 }) as any
+    editContacts.value = res.items || []
+    newContact.value = { type: '', value: '', is_primary: 0, remark: '' }
+    fetchList()
+    ElMessage.success('添加成功')
+  } catch (e: any) {
+    ElMessage.error(e?.response?.data?.detail || '添加失败')
+  }
+}
+
+const handleDeleteBank = async (id: number) => {
+  try {
+    await ElMessageBox.confirm('确认删除该银行账号？', '提示', { type: 'warning' })
+    await bankAccountApi.delete(id)
+    editBanks.value = editBanks.value.filter(b => b.id !== id)
+    fetchList()
+    ElMessage.success('删除成功')
+  } catch (e) {}
+}
+
+const handleAddBank = async () => {
+  if (!newBank.value.bank_name || !newBank.value.account_holder) {
+    ElMessage.warning('请填写开户行和开户名')
+    return
+  }
+  try {
+    await bankAccountApi.create({ ...newBank.value, villager_id: form.value.id })
+    const res = await bankAccountApi.getAll({ villager_id: form.value.id ?? undefined, limit: 1000 }) as any
+    editBanks.value = res.items || []
+    newBank.value = { bank_name: '', account_holder: '', account_number_encrypted: '', account_type: '', is_active: 1, remark: '' }
+    fetchList()
+    ElMessage.success('添加成功')
+  } catch (e: any) {
+    ElMessage.error(e?.response?.data?.detail || '添加失败')
+  }
+}
+
 onMounted(fetchList)
 </script>
 
@@ -168,7 +247,8 @@ onMounted(fetchList)
       <el-table-column prop="id_card" label="身份证号" width="180" />
       <el-table-column prop="household_no" label="户号" />
       <el-table-column prop="relation_to_head" label="与户主关系" width="100" />
-      <el-table-column prop="phone" label="电话" />
+      <el-table-column prop="phones" label="电话" />
+      <el-table-column prop="bank_info" label="银行账号" min-width="180" />
       <el-table-column prop="occupation" label="职业" />
       <el-table-column label="操作" width="180" fixed="right">
         <template #default="{ row }">
@@ -257,6 +337,52 @@ onMounted(fetchList)
         <el-form-item label="备注">
           <el-input v-model="form.remark" type="textarea" :rows="2" />
         </el-form-item>
+
+        <!-- 联系方式区块 -->
+        <el-divider content-position="left">联系方式</el-divider>
+        <el-table :data="editContacts" size="small" stripe style="margin-bottom: 12px">
+          <el-table-column prop="type" label="类型" width="100" />
+          <el-table-column prop="value" label="联系方式" />
+          <el-table-column prop="is_primary" label="主联系" width="80">
+            <template #default="{ row }">{{ row.is_primary === 1 ? '是' : '否' }}</template>
+          </el-table-column>
+          <el-table-column prop="remark" label="备注" />
+          <el-table-column label="操作" width="80">
+            <template #default="{ row }">
+              <el-button size="small" type="danger" @click="handleDeleteContact(row.id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-row :gutter="8" style="margin-bottom: 12px">
+          <el-col :span="6"><el-input v-model="newContact.type" placeholder="类型" size="small" /></el-col>
+          <el-col :span="8"><el-input v-model="newContact.value" placeholder="联系方式" size="small" /></el-col>
+          <el-col :span="4"><el-select v-model="newContact.is_primary" size="small" style="width:100%">
+            <el-option label="主" :value="1" /><el-option label="副" :value="0" />
+          </el-select></el-col>
+          <el-col :span="6"><el-button size="small" type="primary" @click="handleAddContact">添加</el-button></el-col>
+        </el-row>
+
+        <!-- 银行账号区块 -->
+        <el-divider content-position="left">银行账号</el-divider>
+        <el-table :data="editBanks" size="small" stripe style="margin-bottom: 12px">
+          <el-table-column prop="bank_name" label="开户行" />
+          <el-table-column prop="account_holder" label="开户名" />
+          <el-table-column prop="account_number_encrypted" label="卡号" />
+          <el-table-column prop="is_active" label="状态" width="70">
+            <template #default="{ row }">{{ row.is_active === 1 ? '有效' : '无效' }}</template>
+          </el-table-column>
+          <el-table-column label="操作" width="80">
+            <template #default="{ row }">
+              <el-button size="small" type="danger" @click="handleDeleteBank(row.id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-row :gutter="8">
+          <el-col :span="7"><el-input v-model="newBank.bank_name" placeholder="开户行" size="small" /></el-col>
+          <el-col :span="5"><el-input v-model="newBank.account_holder" placeholder="开户名" size="small" /></el-col>
+          <el-col :span="7"><el-input v-model="newBank.account_number_encrypted" placeholder="卡号" size="small" /></el-col>
+          <el-col :span="5"><el-button size="small" type="primary" @click="handleAddBank">添加</el-button></el-col>
+        </el-row>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>

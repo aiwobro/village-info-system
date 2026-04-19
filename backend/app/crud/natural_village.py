@@ -3,8 +3,10 @@ from app.models.natural_village import NaturalVillage
 from app.schemas.natural_village import NaturalVillageCreate, NaturalVillageUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100):
+def get_all(db: Session, skip: int = 0, limit: int = 100, admin_village_id: int | None = None):
     query = db.query(NaturalVillage)
+    if admin_village_id is not None:
+        query = query.filter(NaturalVillage.admin_village_id == admin_village_id)
     total = query.count()
     items = query.offset(skip).limit(limit).all()
     return {"items": items, "total": total}

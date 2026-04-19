@@ -1,11 +1,21 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 from app.models.bank_account import BankAccount
 from app.schemas.bank_account import BankAccountCreate, BankAccountUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100):
-    items = db.query(BankAccount).offset(skip).limit(limit).all()
-    total = db.query(BankAccount).count()
+def get_all(db: Session, skip: int = 0, limit: int = 100, villager_id: int | None = None, search: str = None):
+    query = db.query(BankAccount)
+    if villager_id is not None:
+        query = query.filter(BankAccount.villager_id == villager_id)
+    if search:
+        query = query.filter(or_(
+            BankAccount.account_number_encrypted.contains(search),
+            BankAccount.bank_name.contains(search),
+            BankAccount.remark.contains(search)
+        ))
+    items = query.offset(skip).limit(limit).all()
+    total = query.count()
     return {"items": items, "total": total}
 
 

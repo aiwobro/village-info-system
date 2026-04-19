@@ -21,6 +21,10 @@ const isEdit = ref(false)
 const formRef = ref()
 const loading = ref(false)
 
+// 编辑弹窗中的自然村
+const editNaturalVillages = ref<any[]>([])
+const newNaturalVillageForm = ref({ name: '', leader: '', phone: '', description: '' })
+
 const form = ref({
   id: null as number | null,
   name: '',
@@ -53,9 +57,12 @@ const openAdd = () => {
   dialogVisible.value = true
 }
 
-const openEdit = (row: any) => {
+const openEdit = async (row: any) => {
   isEdit.value = true
   form.value = { ...row }
+  // 加载该行政村下的自然村
+  const res = await naturalVillageApi.getAll({ admin_village_id: row.id ?? undefined, limit: 500 }) as any
+  editNaturalVillages.value = res.items || []
   dialogVisible.value = true
 }
 
@@ -91,6 +98,36 @@ const handleDelete = async (row: any) => {
     ElMessage.success('删除成功')
     fetchList()
   } catch (e) {}
+}
+
+const handleAddNaturalVillage = async () => {
+  if (!newNaturalVillageForm.value.name) {
+    ElMessage.warning('请填写自然村名称')
+    return
+  }
+  try {
+    await naturalVillageApi.create({ ...newNaturalVillageForm.value, admin_village_id: form.value.id })
+    const res = await naturalVillageApi.getAll({ admin_village_id: form.value.id ?? undefined, limit: 500 }) as any
+    editNaturalVillages.value = res.items || []
+    newNaturalVillageForm.value = { name: '', leader: '', phone: '', description: '' }
+    fetchList()
+    ElMessage.success('添加成功')
+  } catch (e: any) {
+    ElMessage.error(e?.response?.data?.detail || '添加失败')
+  }
+}
+
+const handleDeleteNaturalVillage = async (id: number) => {
+  try {
+    await ElMessageBox.confirm('确认删除该自然村？', '提示', { type: 'warning' })
+    await naturalVillageApi.delete(id)
+    editNaturalVillages.value = editNaturalVillages.value.filter(n => n.id !== id)
+    ElMessage.success('删除成功')
+  } catch (e: any) {
+    if (e !== 'cancel') {
+      ElMessage.error(e?.response?.data?.detail || '删除失败')
+    }
+  }
 }
 
 onMounted(fetchList)
@@ -147,6 +184,27 @@ onMounted(fetchList)
         <el-form-item label="描述">
           <el-input v-model="form.description" type="textarea" :rows="3" />
         </el-form-item>
+
+        <!-- 下辖自然村区块 -->
+        <el-divider content-position="left">下辖自然村</el-divider>
+        <el-table :data="editNaturalVillages" size="small" stripe style="margin-bottom: 12px" max-height="250">
+          <el-table-column prop="name" label="名称" />
+          <el-table-column prop="leader" label="负责人" />
+          <el-table-column prop="phone" label="联系电话" />
+          <el-table-column prop="description" label="描述" />
+          <el-table-column label="操作" width="80">
+            <template #default="{ row }">
+              <el-button size="small" type="danger" @click="handleDeleteNaturalVillage(row.id)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-row :gutter="8">
+          <el-col :span="6"><el-input v-model="newNaturalVillageForm.name" placeholder="自然村名称" size="small" /></el-col>
+          <el-col :span="5"><el-input v-model="newNaturalVillageForm.leader" placeholder="负责人" size="small" /></el-col>
+          <el-col :span="5"><el-input v-model="newNaturalVillageForm.phone" placeholder="联系电话" size="small" /></el-col>
+          <el-col :span="5"><el-input v-model="newNaturalVillageForm.description" placeholder="描述" size="small" /></el-col>
+          <el-col :span="3"><el-button size="small" type="primary" @click="handleAddNaturalVillage">添加</el-button></el-col>
+        </el-row>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>

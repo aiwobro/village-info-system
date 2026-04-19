@@ -19,10 +19,11 @@ def get_all(
     skip: int = 0,
     limit: int = 20,
     search: str = Query(None),
+    natural_village_id: int = Query(None),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    return crud.get_all(db, skip=skip, limit=limit, search=search)
+    return crud.get_all(db, skip=skip, limit=limit, search=search, natural_village_id=natural_village_id)
 
 @router.get("/{id}", response_model=ResourceOut)
 def get_by_id(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):

@@ -11,6 +11,7 @@ class ResourceBase(BaseModel):
     reserves: Optional[str] = None
     status: Optional[str] = "可用"
     development: Optional[str] = None
+    natural_village_id: Optional[int] = None
     description: Optional[str] = None
     remark: Optional[str] = None
 

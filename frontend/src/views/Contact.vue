@@ -2,6 +2,8 @@
 import { ref, onMounted } from 'vue'
 import { contactApi } from '../api/contact'
 import { villagerApi } from '../api/villager'
+import { adminVillageApi } from '../api/adminVillage'
+import { naturalVillageApi } from '../api/naturalVillage'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ImportDialog from '../components/ImportDialog.vue'
 
@@ -52,6 +54,10 @@ const search = ref('')
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
+const adminVillages = ref<any[]>([])
+const naturalVillages = ref<any[]>([])
+const filterAdminVillage = ref<number | null>(null)
+const filterNaturalVillage = ref<number | null>(null)
 
 const form = ref({
   id: null as number | null,
@@ -81,10 +87,14 @@ const fetchList = async () => {
   loading.value = true
   try {
     const skip = (page.value - 1) * pageSize.value
-    const [data, villagerData] = await Promise.all([
-      contactApi.getAll({ skip, limit: pageSize.value, search: search.value }),
+    const [data, villagerData, avs, nvs] = await Promise.all([
+      contactApi.getAll({ skip, limit: pageSize.value, search: search.value, natural_village_id: filterNaturalVillage.value ?? undefined }),
       villagerApi.getAll({ limit: 5000 }) as Promise<any>,
+      adminVillageApi.getAll({ limit: 100 }) as Promise<any>,
+      naturalVillageApi.getAll({ limit: 5000 }) as Promise<any>,
     ])
+    adminVillages.value = avs.items || []
+    naturalVillages.value = nvs.items || []
     villagers.value = villagerData.items || []
     list.value = (data.items || []).map(c => ({
       ...c,
@@ -153,7 +163,13 @@ onMounted(fetchList)
       </div>
     </div>
 
-    <div class="search-bar">
+    <div class="filter-bar">
+      <el-select v-model="filterAdminVillage" placeholder="按行政村筛选" clearable style="width: 200px" @change="() => { filterNaturalVillage = null; handleSearch(); }">
+        <el-option v-for="av in adminVillages" :key="av.id" :label="av.name" :value="av.id" />
+      </el-select>
+      <el-select v-model="filterNaturalVillage" placeholder="按自然村筛选" clearable style="width: 200px" @change="handleSearch">
+        <el-option v-for="nv in (filterAdminVillage ? naturalVillages.filter((n: any) => n.admin_village_id === filterAdminVillage) : naturalVillages)" :key="nv.id" :label="nv.name" :value="nv.id" />
+      </el-select>
       <el-input v-model="search" placeholder="搜索村民/联系方式/备注" style="width: 280px" @keyup.enter="handleSearch" />
       <el-button type="primary" @click="handleSearch">搜索</el-button>
     </div>
@@ -239,4 +255,10 @@ onMounted(fetchList)
   margin-bottom: 16px;
 }
 .toolbar h2 { margin: 0; }
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+  align-items: center;
+}
 </style>

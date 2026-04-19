@@ -25,6 +25,10 @@ const importFields = [
 ]
 
 const importHouseholds = ref<any[]>([])
+const adminVillages = ref<any[]>([])
+const naturalVillages = ref<any[]>([])
+const filterAdminVillage = ref<number | null>(null)
+const filterNaturalVillage = ref<number | null>(null)
 
 const importTransform = (record: any) => {
   if (record.household_id && typeof record.household_id === 'string') {
@@ -83,13 +87,15 @@ const fetchList = async () => {
   try {
     const skip = (page.value - 1) * pageSize.value
     const [data, hhs, nvs, avs, contactsData, banksData] = await Promise.all([
-      villagerApi.getAll({ skip, limit: pageSize.value, search: search.value }),
+      villagerApi.getAll({ skip, limit: pageSize.value, search: search.value, natural_village_id: filterNaturalVillage.value ?? undefined }),
       householdApi.getAll({ limit: 5000 }) as Promise<any>,
       naturalVillageApi.getAll({ limit: 5000 }) as Promise<any>,
       adminVillageApi.getAll({ limit: 100 }) as Promise<any>,
       contactApi.getAll({ limit: 5000 }) as Promise<any>,
       bankAccountApi.getAll({ limit: 5000 }) as Promise<any>,
     ])
+    adminVillages.value = avs.items || []
+    naturalVillages.value = nvs.items || []
     households.value = hhs.items || []
     const contacts = contactsData.items || []
     const banks = banksData.items || []
@@ -236,7 +242,13 @@ onMounted(fetchList)
       </div>
     </div>
 
-    <div class="search-bar">
+    <div class="filter-bar">
+      <el-select v-model="filterAdminVillage" placeholder="按行政村筛选" clearable style="width: 200px" @change="() => { filterNaturalVillage = null; handleSearch(); }">
+        <el-option v-for="av in adminVillages" :key="av.id" :label="av.name" :value="av.id" />
+      </el-select>
+      <el-select v-model="filterNaturalVillage" placeholder="按自然村筛选" clearable style="width: 200px" @change="handleSearch">
+        <el-option v-for="nv in (filterAdminVillage ? naturalVillages.filter((n: any) => n.admin_village_id === filterAdminVillage) : naturalVillages)" :key="nv.id" :label="nv.name" :value="nv.id" />
+      </el-select>
       <el-input v-model="search" placeholder="搜索姓名/身份证" style="width: 280px" @keyup.enter="handleSearch" />
       <el-button type="primary" @click="handleSearch">搜索</el-button>
     </div>
@@ -411,9 +423,10 @@ onMounted(fetchList)
   margin-bottom: 16px;
 }
 .toolbar h2 { margin: 0; }
-.search-bar {
+.filter-bar {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   margin-bottom: 16px;
+  align-items: center;
 }
 </style>

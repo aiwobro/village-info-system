@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Float, Text, DateTime
+from sqlalchemy import Column, Integer, String, Float, Text, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.core.database import Base
 
@@ -16,7 +17,11 @@ class Resource(Base):
     reserves = Column(String(100), comment="储量/产量")
     status = Column(String(50), default="可用", comment="状态(可用/开发中/已开发/保护)")
     development = Column(String(200), comment="开发利用情况")
+    natural_village_id = Column(Integer, ForeignKey("natural_villages.id"), comment="所属自然村", nullable=True)
     description = Column(Text, comment="描述")
     remark = Column(Text, comment="备注")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+    # 关联
+    natural_village = relationship("NaturalVillage", back_populates="resources")

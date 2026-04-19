@@ -1,10 +1,13 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
 from app.models.asset import Asset
+from app.models.villager import Villager
+from app.models.household import Household
 from app.schemas.asset import AssetCreate, AssetUpdate
 
-def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None):
-    query = db.query(Asset)
+
+def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None, natural_village_id: int = None):
+    query = db.query(Asset).join(Villager, Asset.villager_id == Villager.id).join(Household, Villager.household_id == Household.id)
     if search:
         query = query.filter(
             or_(
@@ -12,6 +15,8 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None):
                 Asset.code.ilike(f"%{search}%"),
             )
         )
+    if natural_village_id:
+        query = query.filter(Household.natural_village_id == natural_village_id)
     total = query.count()
     items = query.offset(skip).limit(limit).all()
     return {"items": items, "total": total}

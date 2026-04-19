@@ -20,3 +20,4 @@ class NaturalVillage(Base):
     # 关联
     admin_village = relationship("AdminVillage", backref="natural_villages")
     households = relationship("Household", back_populates="natural_village")
+    resources = relationship("Resource", back_populates="natural_village")

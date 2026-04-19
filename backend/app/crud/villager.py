@@ -1,11 +1,13 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 from app.models.villager import Villager
+from app.models.household import Household
+from app.models.natural_village import NaturalVillage
 from app.schemas.villager import VillagerCreate, VillagerUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None, household_id: int = None):
-    q = db.query(Villager)
+def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None, household_id: int = None, natural_village_id: int = None):
+    q = db.query(Villager).join(Household, Villager.household_id == Household.id).join(NaturalVillage, Household.natural_village_id == NaturalVillage.id)
     if search:
         q = q.filter(or_(
             Villager.name.contains(search),
@@ -13,6 +15,8 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None, ho
         ))
     if household_id:
         q = q.filter(Villager.household_id == household_id)
+    if natural_village_id:
+        q = q.filter(Household.natural_village_id == natural_village_id)
     total = q.count()
     items = q.offset(skip).limit(limit).all()
     return {"items": items, "total": total}

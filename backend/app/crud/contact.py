@@ -2,11 +2,12 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import or_
 from app.models.contact import Contact
 from app.models.villager import Villager
+from app.models.household import Household
 from app.schemas.contact import ContactCreate, ContactUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100, villager_id: int | None = None, search: str = None):
-    query = db.query(Contact).join(Villager, Contact.villager_id == Villager.id)
+def get_all(db: Session, skip: int = 0, limit: int = 100, villager_id: int | None = None, search: str = None, natural_village_id: int = None):
+    query = db.query(Contact).join(Villager, Contact.villager_id == Villager.id).join(Household, Villager.household_id == Household.id)
     if villager_id is not None:
         query = query.filter(Contact.villager_id == villager_id)
     if search:
@@ -15,6 +16,8 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, villager_id: int | Non
             Contact.remark.contains(search),
             Villager.name.contains(search)
         ))
+    if natural_village_id:
+        query = query.filter(Household.natural_village_id == natural_village_id)
     items = query.offset(skip).limit(limit).all()
     total = query.count()
     return {"items": items, "total": total}

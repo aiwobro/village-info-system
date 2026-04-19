@@ -1,7 +1,7 @@
 import request from './index'
 
 export const resourceApi = {
-  getAll: (params?: { skip?: number; limit?: number; search?: string }) =>
+  getAll: (params?: { skip?: number; limit?: number; search?: string; natural_village_id?: number }) =>
     request.get('/resources', { params }) as Promise<{ items: any[]; total: number }>,
   getById: (id: number) => request.get(`/resources/${id}`) as Promise<any>,
   create: (data: any) => request.post('/resources', data) as Promise<any>,

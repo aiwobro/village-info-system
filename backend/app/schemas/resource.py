@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 class ResourceBase(BaseModel):
     name: str
@@ -27,3 +27,6 @@ class ResourceOut(ResourceBase):
 
     class Config:
         from_attributes = True
+
+class ResourceBatchCreate(BaseModel):
+    items: List[ResourceCreate]

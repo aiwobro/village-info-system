@@ -1,12 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.schemas.contact import ContactCreate, ContactUpdate, ContactOut
-from app.crud.contact import get_all, get_by_id, create, update, delete
+from app.schemas.contact import ContactCreate, ContactBatchCreate, ContactUpdate, ContactOut
+from app.crud.contact import get_all, get_by_id, create, update, delete, batch_create
 from app.models.user import User
 from app.api.auth import get_current_user
 
 router = APIRouter(prefix="/contacts", tags=["联系方式"])
+
+
+
+@router.post("/batch")
+def batch_create_api(obj: ContactBatchCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return batch_create(db, obj.items)
 
 
 @router.get("")

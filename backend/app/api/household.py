@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.schemas.household import HouseholdCreate, HouseholdUpdate, HouseholdOut
-from app.crud.household import get_all, get_by_id, create, update, delete, get_stats
+from app.schemas.household import HouseholdCreate, HouseholdUpdate, HouseholdOut, HouseholdBatchCreate
+from app.crud.household import get_all, get_by_id, create, update, delete, get_stats, batch_create
 from app.models.user import User
 from app.api.auth import get_current_user
 
@@ -17,6 +17,11 @@ def get_all_api(skip: int = 0, limit: int = 100, natural_village_id: int = Query
 @router.get("/stats")
 def get_stats_api(natural_village_id: int = Query(None), admin_village_id: int = Query(None), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return get_stats(db, natural_village_id=natural_village_id, admin_village_id=admin_village_id)
+
+
+@router.post("/batch")
+def batch_create_api(obj: HouseholdBatchCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return batch_create(db, obj.items)
 
 
 @router.get("/{id}", response_model=HouseholdOut)

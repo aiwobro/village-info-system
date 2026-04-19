@@ -13,6 +13,7 @@ const props = defineProps<{
   title: string
   fields: Field[]
   api: any
+  batchApi?: any  // 批量接口，若提供则用批量模式
   transform?: (record: any) => any  // 可选：导入前转换字段（如把村名转成ID）
 }>()
 
@@ -79,9 +80,11 @@ const handleConfirm = async () => {
   let successCount = 0
   const errors: { row: number; msg: string }[] = []
 
+  // 先把所有行转成记录，校验必填
+  const records: any[] = []
   for (let i = 0; i < previewData.value.length; i++) {
     const row = previewData.value[i]
-    const rowNum = i + 2 // Excel 行号（1是表头）
+    const rowNum = i + 2
     const record: any = {}
 
     for (let j = 0; j < props.fields.length; j++) {
@@ -94,23 +97,44 @@ const handleConfirm = async () => {
       }
     }
 
-    // 检查必填字段
     for (const f of props.fields) {
       if (f.required && !record[f.field]) {
         errors.push({ row: rowNum, msg: `缺少必填字段: ${f.label}` })
-        continue
       }
     }
 
     if (errors.length > 0 && errors[errors.length - 1].row === rowNum) continue
+    records.push({ rowNum, record })
+  }
 
+  // 批量模式
+  if (props.batchApi) {
+    const validRecords = records.map(r => props.transform ? props.transform(r.record) : r.record)
     try {
-      const finalRecord = props.transform ? props.transform(record) : record
-      await (props as any).api.create(finalRecord)
-      successCount++
+      const res = await props.batchApi(validRecords) as any
+      successCount = res.success || 0
+      if (res.errors) {
+        for (const e of res.errors) {
+          errors.push({ row: e.row, msg: e.msg })
+        }
+      }
     } catch (e: any) {
-      const msg = e?.response?.data?.detail || e?.message || '导入失败'
-      errors.push({ row: rowNum, msg })
+      const detail = e?.response?.data?.detail || e?.message || '未知错误'
+      ElMessage.error('批量导入请求失败: ' + (typeof detail === 'string' ? detail : JSON.stringify(detail)))
+      loading.value = false
+      return
+    }
+  } else {
+    // 逐条模式（兜底）
+    for (const { rowNum, record } of records) {
+      try {
+        const finalRecord = props.transform ? props.transform(record) : record
+        await (props as any).api.create(finalRecord)
+        successCount++
+      } catch (e: any) {
+        const msg = e?.response?.data?.detail || e?.message || '导入失败'
+        errors.push({ row: rowNum, msg })
+      }
     }
   }
 

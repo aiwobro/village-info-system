@@ -225,6 +225,7 @@ onMounted(fetchList)
       title="批量导入资源"
       :fields="importFields"
       :api="resourceApi"
+      :batch-api="resourceApi.batchCreate"
       @success="fetchList"
     />
   </div>

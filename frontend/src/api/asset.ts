@@ -6,5 +6,6 @@ export const assetApi = {
   getById: (id: number) => request.get(`/assets/${id}`) as Promise<any>,
   create: (data: any) => request.post('/assets', data) as Promise<any>,
   update: (id: number, data: any) => request.put(`/assets/${id}`, data) as Promise<any>,
+  batchCreate: (items: any[]) => request.post("/assets/batch", { items }) as Promise<any>,
   delete: (id: number) => request.delete(`/assets/${id}`) as Promise<any>,
 }

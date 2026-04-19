@@ -238,6 +238,7 @@ onMounted(fetchList)
       title="批量导入资产"
       :fields="importFields"
       :api="assetApi"
+      :batch-api="assetApi.batchCreate"
       @success="fetchList"
     />
   </div>

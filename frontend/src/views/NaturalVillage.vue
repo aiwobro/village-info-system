@@ -175,6 +175,7 @@ onMounted(fetchList)
       title="批量导入自然村"
       :fields="importFields"
       :api="naturalVillageApi"
+      :batch-api="naturalVillageApi.batchCreate"
       :transform="importTransform"
       @success="fetchList"
     />

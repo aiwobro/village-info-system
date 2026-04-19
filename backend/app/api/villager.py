@@ -1,12 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.schemas.villager import VillagerCreate, VillagerUpdate, VillagerOut
+from app.schemas.villager import VillagerCreate, VillagerBatchCreate, VillagerUpdate, VillagerOut
 from app.crud import villager as crud
 from app.models.user import User
 from app.api.auth import get_current_user
 
 router = APIRouter(prefix="/villagers", tags=["村民管理"])
+
+
+
+@router.post("/batch")
+def batch_create_api(obj: VillagerBatchCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return batch_create(db, obj.items)
 
 
 @router.get("")

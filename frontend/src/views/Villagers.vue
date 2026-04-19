@@ -36,7 +36,7 @@ const importTransform = (record: any) => {
 
 const openImport = async () => {
   importDialogVisible.value = true
-  const hhs = await householdApi.getAll({ limit: 1000 }) as any
+  const hhs = await householdApi.getAll({ limit: 5000 }) as any
   importHouseholds.value = hhs.items || []
 }
 
@@ -76,8 +76,8 @@ const fetchList = async () => {
     const skip = (page.value - 1) * pageSize.value
     const [data, hhs, nvs, avs] = await Promise.all([
       villagerApi.getAll({ skip, limit: pageSize.value, search: search.value }),
-      householdApi.getAll({ limit: 1000 }) as Promise<any>,
-      naturalVillageApi.getAll({ limit: 1000 }) as Promise<any>,
+      householdApi.getAll({ limit: 5000 }) as Promise<any>,
+      naturalVillageApi.getAll({ limit: 5000 }) as Promise<any>,
       adminVillageApi.getAll({ limit: 100 }) as Promise<any>,
     ])
     households.value = hhs.items || []
@@ -269,6 +269,7 @@ onMounted(fetchList)
       title="批量导入村民"
       :fields="importFields"
       :api="villagerApi"
+      :batch-api="villagerApi.batchCreate"
       :transform="importTransform"
       @success="fetchList"
     />

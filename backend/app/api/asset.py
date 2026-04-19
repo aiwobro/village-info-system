@@ -1,12 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.schemas.asset import AssetCreate, AssetUpdate, AssetOut
+from app.schemas.asset import AssetCreate, AssetBatchCreate, AssetUpdate, AssetOut
 from app.crud import asset as crud
 from app.models.user import User
 from app.api.auth import get_current_user
 
 router = APIRouter(prefix="/assets", tags=["资产管理"])
+
+
+@router.post("/batch")
+def batch_create_api(obj: AssetBatchCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return batch_create(db, obj.items)
+
 
 @router.get("")
 def get_all(

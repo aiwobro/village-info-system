@@ -159,6 +159,7 @@ onMounted(fetchList)
       title="批量导入行政村"
       :fields="importFields"
       :api="adminVillageApi"
+      :batch-api="adminVillageApi.batchCreate"
       @success="fetchList"
     />
   </div>

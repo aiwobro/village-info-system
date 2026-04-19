@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 
 class VillagerBase(BaseModel):
@@ -32,3 +32,6 @@ class VillagerOut(VillagerBase):
 
     class Config:
         from_attributes = True
+
+class VillagerBatchCreate(BaseModel):
+    items: List[VillagerCreate]

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 
 class NaturalVillageBase(BaseModel):
@@ -26,3 +26,6 @@ class NaturalVillageOut(NaturalVillageBase):
 
     class Config:
         from_attributes = True
+
+class NaturalVillageBatchCreate(BaseModel):
+    items: List[NaturalVillageCreate]

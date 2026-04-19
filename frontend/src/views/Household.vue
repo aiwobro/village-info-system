@@ -128,7 +128,7 @@ const fetchList = async () => {
 const fetchAllVillages = async () => {
   const avs = await adminVillageApi.getAll({ limit: 100 }) as any
   adminVillages.value = avs.items || []
-  const nvs = await naturalVillageApi.getAll({ limit: 1000 }) as any
+  const nvs = await naturalVillageApi.getAll({ limit: 5000 }) as any
   naturalVillages.value = nvs.items || []
 }
 
@@ -194,7 +194,7 @@ const handleDelete = async (row: any) => {
 
 const openImport = async () => {
   importDialogVisible.value = true
-  const nvs = await naturalVillageApi.getAll({ limit: 1000 }) as any
+  const nvs = await naturalVillageApi.getAll({ limit: 5000 }) as any
   importNaturalVillages.value = nvs.items || []
 }
 
@@ -306,6 +306,7 @@ onMounted(async () => {
       title="批量导入户"
       :fields="importFields"
       :api="householdApi"
+      :batch-api="householdApi.batchCreate"
       :transform="importTransform"
       @success="fetchList"
     />

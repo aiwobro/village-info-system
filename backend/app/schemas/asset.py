@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from decimal import Decimal
 
 class AssetBase(BaseModel):
@@ -32,3 +32,6 @@ class AssetOut(AssetBase):
 
     class Config:
         from_attributes = True
+
+class AssetBatchCreate(BaseModel):
+    items: List[AssetCreate]

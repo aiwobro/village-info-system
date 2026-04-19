@@ -40,3 +40,20 @@ def delete(db: Session, id: int):
     db.delete(db_obj)
     db.commit()
     return True
+
+
+def batch_create(db: Session, items: list):
+    """批量创建记录"""
+    results = {"success": 0, "failed": 0, "errors": []}
+    for i, obj in enumerate(items):
+        try:
+            db_obj = AdminVillage(**obj.model_dump())
+            db.add(db_obj)
+            db.commit()
+            db.refresh(db_obj)
+            results["success"] += 1
+        except Exception as e:
+            db.rollback()
+            results["failed"] += 1
+            results["errors"].append({"row": i + 1, "msg": str(e)})
+    return results

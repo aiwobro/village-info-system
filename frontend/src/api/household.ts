@@ -7,6 +7,7 @@ export const householdApi = {
     request.get('/households/stats', { params }) as Promise<{ household_count: number; villager_count: number }>,
   getById: (id: number) => request.get(`/households/${id}`) as Promise<any>,
   create: (data: any) => request.post('/households', data) as Promise<any>,
+  batchCreate: (items: any[]) => request.post('/households/batch', { items }) as Promise<any>,
   update: (id: number, data: any) => request.put(`/households/${id}`, data) as Promise<any>,
   delete: (id: number) => request.delete(`/households/${id}`) as Promise<any>,
 }

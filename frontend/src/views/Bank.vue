@@ -21,15 +21,18 @@ const importVillagers = ref<any[]>([])
 const importTransform = (record: any) => {
   if (record.villager_id && typeof record.villager_id === 'string') {
     const found = importVillagers.value.find(
-      (v: any) => v.name === record.villager_id || String(v.id) === record.villager_id
+      (v: any) => v.name === record.villager_id || String(v.id) === record.villager_id || String(v.id_card) === record.villager_id
     )
     if (found) record.villager_id = found.id
   }
+  if (record.account_number_encrypted !== undefined && record.account_number_encrypted !== null) {
+    record.account_number_encrypted = String(record.account_number_encrypted)
+  }
   if (record.is_active !== undefined) {
     if (String(record.is_active).toLowerCase() === '是' || String(record.is_active) === '1' || String(record.is_active).toLowerCase() === 'true' || String(record.is_active) === '正常' || String(record.is_active) === '激活') {
-      record.is_active = true
+      record.is_active = 1
     } else if (String(record.is_active).toLowerCase() === '否' || String(record.is_active) === '0' || String(record.is_active).toLowerCase() === 'false' || String(record.is_active) === '停用' || String(record.is_active) === '注销') {
-      record.is_active = false
+      record.is_active = 0
     }
   }
   return record
@@ -37,7 +40,7 @@ const importTransform = (record: any) => {
 
 const openImport = async () => {
   importDialogVisible.value = true
-  const res = await villagerApi.getAll({ limit: 1000 }) as any
+  const res = await villagerApi.getAll({ limit: 5000 }) as any
   importVillagers.value = res.items || []
 }
 
@@ -214,6 +217,7 @@ onMounted(fetchList)
       title="批量导入银行账号"
       :fields="importFields"
       :api="bankAccountApi"
+      :batch-api="bankAccountApi.batchCreate"
       :transform="importTransform"
       @success="fetchList"
     />

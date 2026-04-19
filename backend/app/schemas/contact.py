@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
 
 
 class ContactBase(BaseModel):
@@ -23,3 +23,6 @@ class ContactOut(ContactBase):
 
     class Config:
         from_attributes = True
+
+class ContactBatchCreate(BaseModel):
+    items: List[ContactCreate]

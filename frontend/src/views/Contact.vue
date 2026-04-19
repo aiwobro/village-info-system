@@ -19,15 +19,18 @@ const importVillagers = ref<any[]>([])
 const importTransform = (record: any) => {
   if (record.villager_id && typeof record.villager_id === 'string') {
     const found = importVillagers.value.find(
-      (v: any) => v.name === record.villager_id || String(v.id) === record.villager_id
+      (v: any) => v.name === record.villager_id || String(v.id) === record.villager_id || String(v.id_card) === record.villager_id
     )
     if (found) record.villager_id = found.id
   }
+  if (record.value !== undefined && record.value !== null) {
+    record.value = String(record.value)
+  }
   if (record.is_primary !== undefined) {
     if (String(record.is_primary).toLowerCase() === '是' || String(record.is_primary) === '1' || String(record.is_primary).toLowerCase() === 'true') {
-      record.is_primary = true
+      record.is_primary = 1
     } else if (String(record.is_primary).toLowerCase() === '否' || String(record.is_primary) === '0' || String(record.is_primary).toLowerCase() === 'false') {
-      record.is_primary = false
+      record.is_primary = 0
     }
   }
   return record
@@ -35,7 +38,7 @@ const importTransform = (record: any) => {
 
 const openImport = async () => {
   importDialogVisible.value = true
-  const res = await villagerApi.getAll({ limit: 1000 }) as any
+  const res = await villagerApi.getAll({ limit: 5000 }) as any
   importVillagers.value = res.items || []
 }
 
@@ -211,6 +214,7 @@ onMounted(fetchList)
       title="批量导入联系方式"
       :fields="importFields"
       :api="contactApi"
+      :batch-api="contactApi.batchCreate"
       :transform="importTransform"
       @success="fetchList"
     />

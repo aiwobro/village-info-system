@@ -6,5 +6,6 @@ export const villagerApi = {
   getById: (id: number) => request.get(`/villagers/${id}`) as Promise<any>,
   create: (data: any) => request.post('/villagers', data) as Promise<any>,
   update: (id: number, data: any) => request.put(`/villagers/${id}`, data) as Promise<any>,
+  batchCreate: (items: any[]) => request.post("/villagers/batch", { items }) as Promise<any>,
   delete: (id: number) => request.delete(`/villagers/${id}`) as Promise<any>,
 }

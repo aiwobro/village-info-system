@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import List, Optional
 
 
 class BankAccountBase(BaseModel):
@@ -25,3 +25,6 @@ class BankAccountOut(BankAccountBase):
 
     class Config:
         from_attributes = True
+
+class BankAccountBatchCreate(BaseModel):
+    items: List[BankAccountCreate]

@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 
 class AdminVillageBase(BaseModel):
@@ -27,3 +27,6 @@ class AdminVillageOut(AdminVillageBase):
 
     class Config:
         from_attributes = True
+
+class AdminVillageBatchCreate(BaseModel):
+    items: List[AdminVillageCreate]

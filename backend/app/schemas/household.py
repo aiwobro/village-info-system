@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 
 class HouseholdBase(BaseModel):
@@ -12,6 +12,10 @@ class HouseholdBase(BaseModel):
 
 class HouseholdCreate(HouseholdBase):
     pass
+
+
+class HouseholdBatchCreate(BaseModel):
+    items: List[HouseholdCreate]
 
 
 class HouseholdUpdate(HouseholdBase):

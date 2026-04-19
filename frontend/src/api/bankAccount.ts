@@ -6,5 +6,6 @@ export const bankAccountApi = {
   getById: (id: number) => request.get(`/bank-accounts/${id}`) as Promise<any>,
   create: (data: any) => request.post('/bank-accounts', data) as Promise<any>,
   update: (id: number, data: any) => request.put(`/bank-accounts/${id}`, data) as Promise<any>,
+  batchCreate: (items: any[]) => request.post("/bank-accounts/batch", { items }) as Promise<any>,
   delete: (id: number) => request.delete(`/bank-accounts/${id}`) as Promise<any>,
 }

@@ -2,24 +2,25 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-class VillageBase(BaseModel):
+
+class AdminVillageBase(BaseModel):
     name: str
     code: Optional[str] = None
+    leader: Optional[str] = None
+    phone: Optional[str] = None
     address: Optional[str] = None
-    area: Optional[float] = None
-    population: Optional[int] = 0
-    established_date: Optional[str] = None
-    latitude: Optional[float] = None
-    longitude: Optional[float] = None
     description: Optional[str] = None
 
-class VillageCreate(VillageBase):
+
+class AdminVillageCreate(AdminVillageBase):
     pass
 
-class VillageUpdate(VillageBase):
+
+class AdminVillageUpdate(AdminVillageBase):
     pass
 
-class VillageOut(VillageBase):
+
+class AdminVillageOut(AdminVillageBase):
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None

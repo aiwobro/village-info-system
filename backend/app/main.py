@@ -3,9 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.core.config import settings
 from app.core.database import engine, Base, SessionLocal
-from app.models import Village, Villager, Contact, BankAccount, Asset, Resource
+from app.models import AdminVillage, NaturalVillage, Household, Villager, Contact, BankAccount, Asset, Resource
 from app.models.user import User
-from app.api import village, villager, contact, bank_account, asset, resource
+from app.api import admin_village, natural_village, household, villager, contact, bank_account, asset, resource
 from app.api.auth import router as auth_router
 
 # Create tables
@@ -52,7 +52,9 @@ def health():
 
 # Include routers
 app.include_router(auth_router, prefix=settings.API_V1_STR)
-app.include_router(village.router, prefix=settings.API_V1_STR)
+app.include_router(admin_village.router, prefix=settings.API_V1_STR)
+app.include_router(natural_village.router, prefix=settings.API_V1_STR)
+app.include_router(household.router, prefix=settings.API_V1_STR)
 app.include_router(villager.router, prefix=settings.API_V1_STR)
 app.include_router(contact.router, prefix=settings.API_V1_STR)
 app.include_router(bank_account.router, prefix=settings.API_V1_STR)

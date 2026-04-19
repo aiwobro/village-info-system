@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
-from app.schemas.contact import ContactCreate, ContactUpdate, ContactOut
-from app.crud.contact import get_all, get_by_id, create, update, delete
+from app.schemas.admin_village import AdminVillageCreate, AdminVillageUpdate, AdminVillageOut
+from app.crud.admin_village import get_all, get_by_id, create, update, delete
 from app.models.user import User
 from app.api.auth import get_current_user
 
-router = APIRouter(prefix="/contacts", tags=["联系方式"])
+router = APIRouter(prefix="/admin-villages", tags=["行政村"])
 
 
 @router.get("")
@@ -14,7 +14,7 @@ def get_all_api(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), 
     return get_all(db, skip=skip, limit=limit)
 
 
-@router.get("/{id}", response_model=ContactOut)
+@router.get("/{id}", response_model=AdminVillageOut)
 def get_by_id_api(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     obj = get_by_id(db, id)
     if not obj:
@@ -22,13 +22,13 @@ def get_by_id_api(id: int, db: Session = Depends(get_db), current_user: User = D
     return obj
 
 
-@router.post("", response_model=ContactOut)
-def create_api(obj: ContactCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@router.post("", response_model=AdminVillageOut)
+def create_api(obj: AdminVillageCreate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     return create(db, obj)
 
 
-@router.put("/{id}", response_model=ContactOut)
-def update_api(id: int, obj: ContactUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+@router.put("/{id}", response_model=AdminVillageOut)
+def update_api(id: int, obj: AdminVillageUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = update(db, id, obj)
     if not result:
         raise HTTPException(status_code=404, detail="未找到")

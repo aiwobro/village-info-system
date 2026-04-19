@@ -2,14 +2,14 @@ from sqlalchemy.orm import Session
 from app.models.bank_account import BankAccount
 from app.schemas.bank_account import BankAccountCreate, BankAccountUpdate
 
-def get_all(db: Session, skip: int = 0, limit: int = 100, villager_id: int = None):
-    query = db.query(BankAccount)
-    if villager_id:
-        query = query.filter(BankAccount.villager_id == villager_id)
-    return query.offset(skip).limit(limit).all()
+
+def get_all(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(BankAccount).offset(skip).limit(limit).all()
+
 
 def get_by_id(db: Session, id: int):
     return db.query(BankAccount).filter(BankAccount.id == id).first()
+
 
 def create(db: Session, obj: BankAccountCreate):
     db_obj = BankAccount(**obj.model_dump())
@@ -17,6 +17,7 @@ def create(db: Session, obj: BankAccountCreate):
     db.commit()
     db.refresh(db_obj)
     return db_obj
+
 
 def update(db: Session, id: int, obj: BankAccountUpdate):
     db_obj = get_by_id(db, id)
@@ -27,6 +28,7 @@ def update(db: Session, id: int, obj: BankAccountUpdate):
     db.commit()
     db.refresh(db_obj)
     return db_obj
+
 
 def delete(db: Session, id: int):
     db_obj = get_by_id(db, id)

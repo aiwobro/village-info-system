@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime
-from sqlalchemy.sql import func
+from sqlalchemy import Column, Integer, String, ForeignKey, DateTime
+from sqlalchemy.orm import relationship
 from app.core.database import Base
 
 
@@ -9,13 +9,10 @@ class Contact(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     villager_id = Column(Integer, ForeignKey("villagers.id"), nullable=False, comment="关联村民")
-    phone = Column(String(20), comment="手机号")
-    backup_phone = Column(String(20), comment="备用电话")
-    wechat = Column(String(100), comment="微信号")
-    qq = Column(String(50), comment="QQ号")
-    email = Column(String(100), comment="邮箱")
-    emergency_contact = Column(String(100), comment="紧急联系人")
-    emergency_phone = Column(String(20), comment="紧急联系人电话")
-    remark = Column(Text, comment="备注")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    type = Column(String(20), nullable=False, comment="类型: phone/wechat/qq/email")
+    value = Column(String(100), nullable=False, comment="联系方式值")
+    is_primary = Column(Integer, default=0, comment="是否主要联系方式")
+    remark = Column(String(200), comment="备注")
+
+    # 关联
+    villager = relationship("Villager", back_populates="contacts")

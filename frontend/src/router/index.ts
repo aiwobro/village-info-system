@@ -21,6 +21,18 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/natural-village',
+    name: 'NaturalVillage',
+    component: () => import('../views/NaturalVillage.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/household',
+    name: 'Household',
+    component: () => import('../views/Household.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/villagers',
     name: 'Villagers',
     component: () => import('../views/Villagers.vue'),

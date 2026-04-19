@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import { adminVillageApi } from '../api/adminVillage'
 import { naturalVillageApi } from '../api/naturalVillage'
+import { adminVillageApi } from '../api/adminVillage'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const list = ref<any[]>([])
+const adminVillages = ref<any[]>([])
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
@@ -13,21 +14,29 @@ const loading = ref(false)
 const form = ref({
   id: null as number | null,
   name: '',
-  code: '',
+  admin_village_id: null as number | null,
   leader: '',
   phone: '',
-  address: '',
   description: '',
 })
 
 const rules = {
   name: [{ required: true, message: '请输入村名', trigger: 'blur' }],
+  admin_village_id: [{ required: true, message: '请选择所属行政村', trigger: 'change' }],
 }
 
 const fetchList = async () => {
   loading.value = true
   try {
-    list.value = await adminVillageApi.getAll({ limit: 100 }) as any[]
+    const [villages, admins] = await Promise.all([
+      naturalVillageApi.getAll({ limit: 1000 }) as Promise<any[]>,
+      adminVillageApi.getAll({ limit: 100 }) as Promise<any[]>,
+    ])
+    list.value = villages.map(v => ({
+      ...v,
+      admin_village_name: admins.find((a: any) => a.id === v.admin_village_id)?.name || '-',
+    }))
+    adminVillages.value = admins
   } catch (e) {
     console.error(e)
   } finally {
@@ -37,7 +46,7 @@ const fetchList = async () => {
 
 const openAdd = () => {
   isEdit.value = false
-  form.value = { id: null, name: '', code: '', leader: '', phone: '', address: '', description: '' }
+  form.value = { id: null, name: '', admin_village_id: null, leader: '', phone: '', description: '' }
   dialogVisible.value = true
 }
 
@@ -53,10 +62,10 @@ const handleSubmit = async () => {
     if (!valid) return
     try {
       if (isEdit.value && form.value.id) {
-        await adminVillageApi.update(form.value.id, form.value)
+        await naturalVillageApi.update(form.value.id, form.value)
         ElMessage.success('更新成功')
       } else {
-        await adminVillageApi.create(form.value)
+        await naturalVillageApi.create(form.value)
         ElMessage.success('创建成功')
       }
       dialogVisible.value = false
@@ -67,15 +76,8 @@ const handleSubmit = async () => {
 
 const handleDelete = async (row: any) => {
   try {
-    // 检查是否有关联的自然村
-    const naturalVillages = await naturalVillageApi.getAll({ limit: 1000 }) as any[]
-    const hasChildren = naturalVillages.some((v: any) => v.admin_village_id === row.id)
-    if (hasChildren) {
-      ElMessage.warning('该行政村下有自然村，无法删除')
-      return
-    }
-    await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
-    await adminVillageApi.delete(row.id)
+    await ElMessageBox.confirm('确认删除该自然村？', '提示', { type: 'warning' })
+    await naturalVillageApi.delete(row.id)
     ElMessage.success('删除成功')
     fetchList()
   } catch (e) {}
@@ -87,16 +89,15 @@ onMounted(fetchList)
 <template>
   <div class="page">
     <div class="toolbar">
-      <h2>🏘️ 行政村管理</h2>
-      <el-button type="primary" @click="openAdd">新增行政村</el-button>
+      <h2>🏡 自然村管理</h2>
+      <el-button type="primary" @click="openAdd">新增自然村</el-button>
     </div>
 
     <el-table :data="list" v-loading="loading" stripe>
       <el-table-column prop="name" label="村名" />
-      <el-table-column prop="code" label="村庄代码" />
+      <el-table-column prop="admin_village_name" label="所属行政村" />
       <el-table-column prop="leader" label="负责人" />
       <el-table-column prop="phone" label="联系电话" />
-      <el-table-column prop="address" label="地址" />
       <el-table-column prop="description" label="描述" />
       <el-table-column label="操作" width="180">
         <template #default="{ row }">
@@ -106,13 +107,15 @@ onMounted(fetchList)
       </el-table-column>
     </el-table>
 
-    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑行政村' : '新增行政村'" width="600px">
+    <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑自然村' : '新增自然村'" width="600px">
       <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="村名" prop="name">
           <el-input v-model="form.name" />
         </el-form-item>
-        <el-form-item label="村庄代码">
-          <el-input v-model="form.code" />
+        <el-form-item label="所属行政村" prop="admin_village_id">
+          <el-select v-model="form.admin_village_id" style="width: 100%" placeholder="请选择">
+            <el-option v-for="av in adminVillages" :key="av.id" :label="av.name" :value="av.id" />
+          </el-select>
         </el-form-item>
         <el-row :gutter="16">
           <el-col :span="12">
@@ -126,9 +129,6 @@ onMounted(fetchList)
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="地址">
-          <el-input v-model="form.address" />
-        </el-form-item>
         <el-form-item label="描述">
           <el-input v-model="form.description" type="textarea" :rows="3" />
         </el-form-item>

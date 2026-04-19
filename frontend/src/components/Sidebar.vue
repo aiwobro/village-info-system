@@ -6,7 +6,9 @@ const route = useRoute()
 
 const menuItems = [
   { path: '/', label: '首页', icon: 'HomeFilled' },
-  { path: '/village', label: '村庄信息', icon: 'LocationInformation' },
+  { path: '/village', label: '行政村', icon: 'LocationInformation' },
+  { path: '/natural-village', label: '自然村', icon: 'OfficeBuilding' },
+  { path: '/household', label: '户管理', icon: 'House' },
   { path: '/villagers', label: '村民管理', icon: 'User' },
   { path: '/contact', label: '联系方式', icon: 'Phone' },
   { path: '/bank', label: '银行账号', icon: 'BankCard' },

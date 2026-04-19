@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { bankAccountApi } from '../api/bankAccount'
+import { villagerApi } from '../api/villager'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const list = ref<any[]>([])
+const villagers = ref<any[]>([])
 const loading = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
@@ -12,9 +14,8 @@ const formRef = ref()
 const form = ref({
   id: null as number | null,
   villager_id: null as number | null,
-  account_holder: '',
   bank_name: '',
-  bank_branch: '',
+  account_holder: '',
   account_number_encrypted: '',
   account_type: '',
   is_active: 1,
@@ -22,14 +23,23 @@ const form = ref({
 })
 
 const rules = {
-  villager_id: [{ required: true, message: '请选择关联村民', trigger: 'change' }],
+  villager_id: [{ required: true, message: '请选择村民', trigger: 'change' }],
+  bank_name: [{ required: true, message: '请输入开户行', trigger: 'blur' }],
   account_holder: [{ required: true, message: '请输入开户名', trigger: 'blur' }],
 }
 
 const fetchList = async () => {
   loading.value = true
   try {
-    list.value = await bankAccountApi.getAll({ limit: 100 }) as any[]
+    const [accounts, villagerList] = await Promise.all([
+      bankAccountApi.getAll({ limit: 1000 }) as Promise<any[]>,
+      villagerApi.getAll({ limit: 1000 }) as Promise<any[]>,
+    ])
+    villagers.value = villagerList
+    list.value = accounts.map(b => ({
+      ...b,
+      villager_name: villagerList.find((v: any) => v.id === b.villager_id)?.name || '-',
+    }))
   } catch (e) {
     console.error(e)
   } finally {
@@ -39,7 +49,7 @@ const fetchList = async () => {
 
 const openAdd = () => {
   isEdit.value = false
-  form.value = { id: null, villager_id: null, account_holder: '', bank_name: '', bank_branch: '', account_number_encrypted: '', account_type: '', is_active: 1, remark: '' }
+  form.value = { id: null, villager_id: null, bank_name: '', account_holder: '', account_number_encrypted: '', account_type: '', is_active: 1, remark: '' }
   dialogVisible.value = true
 }
 
@@ -87,10 +97,9 @@ onMounted(fetchList)
     </div>
 
     <el-table :data="list" v-loading="loading" stripe>
-      <el-table-column prop="villager_id" label="村民ID" width="100" />
+      <el-table-column prop="villager_name" label="村民" width="100" />
       <el-table-column prop="account_holder" label="开户名" />
       <el-table-column prop="bank_name" label="开户行" />
-      <el-table-column prop="bank_branch" label="支行" />
       <el-table-column prop="account_number_encrypted" label="卡号" />
       <el-table-column prop="account_type" label="账户类型" />
       <el-table-column prop="is_active" label="状态" width="80">
@@ -107,18 +116,17 @@ onMounted(fetchList)
     </el-table>
 
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑账号' : '新增账号'" width="600px">
-      <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
-        <el-form-item label="村民ID" prop="villager_id">
-          <el-input-number v-model="form.villager_id" :min="1" style="width: 100%" />
+      <el-form ref="formRef" :model="form" :rules="rules" label-width="100px">
+        <el-form-item label="村民" prop="villager_id">
+          <el-select v-model="form.villager_id" style="width: 100%" placeholder="请选择村民" filterable>
+            <el-option v-for="v in villagers" :key="v.id" :label="v.name" :value="v.id" />
+          </el-select>
         </el-form-item>
         <el-form-item label="开户名" prop="account_holder">
           <el-input v-model="form.account_holder" />
         </el-form-item>
-        <el-form-item label="开户行">
+        <el-form-item label="开户行" prop="bank_name">
           <el-input v-model="form.bank_name" />
-        </el-form-item>
-        <el-form-item label="支行">
-          <el-input v-model="form.bank_branch" />
         </el-form-item>
         <el-form-item label="卡号">
           <el-input v-model="form.account_number_encrypted" />

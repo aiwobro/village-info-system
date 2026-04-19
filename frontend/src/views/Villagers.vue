@@ -1,9 +1,13 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted } from 'vue'
 import { villagerApi } from '../api/villager'
+import { householdApi } from '../api/household'
+import { naturalVillageApi } from '../api/naturalVillage'
+import { adminVillageApi } from '../api/adminVillage'
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 const list = ref<any[]>([])
+const households = ref<any[]>([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(20)
@@ -19,14 +23,11 @@ const form = ref({
   id_card: '',
   gender: '',
   birth_date: '',
-  age: null as number | null,
   ethnicity: '',
   education: '',
   occupation: '',
-  household_relation: '',
-  is_householder: 0,
-  household_id: '',
-  village_id: null as number | null,
+  relation_to_head: '',
+  household_id: null as number | null,
   address: '',
   remark: '',
 })
@@ -39,11 +40,25 @@ const fetchList = async () => {
   loading.value = true
   try {
     const skip = (page.value - 1) * pageSize.value
-    const [data, countData] = await Promise.all([
+    const [data, countData, hhs, nvs, avs] = await Promise.all([
       villagerApi.getAll({ skip, limit: pageSize.value, search: search.value }),
       villagerApi.getCount(search.value),
+      householdApi.getAll({ limit: 1000 }) as Promise<any[]>,
+      naturalVillageApi.getAll({ limit: 1000 }) as Promise<any[]>,
+      adminVillageApi.getAll({ limit: 100 }) as Promise<any[]>,
     ])
-    list.value = data as any[]
+    households.value = hhs
+    list.value = (data as any[]).map(v => {
+      const hh = hhs.find((h: any) => h.id === v.household_id)
+      const nv = hh ? nvs.find((n: any) => n.id === hh.natural_village_id) : null
+      const av = nv ? avs.find((a: any) => a.id === nv.admin_village_id) : null
+      return {
+        ...v,
+        household_no: hh?.household_no || '-',
+        natural_village_name: nv?.name || '-',
+        admin_village_name: av?.name || '-',
+      }
+    })
     total.value = (countData as any).count
   } catch (e) {
     console.error(e)
@@ -59,7 +74,7 @@ const handleSearch = () => {
 
 const openAdd = () => {
   isEdit.value = false
-  form.value = { id: null, name: '', id_card: '', gender: '', birth_date: '', age: null, ethnicity: '', education: '', occupation: '', household_relation: '', is_householder: 0, household_id: '', village_id: null, address: '', remark: '' }
+  form.value = { id: null, name: '', id_card: '', gender: '', birth_date: '', ethnicity: '', education: '', occupation: '', relation_to_head: '', household_id: null, address: '', remark: '' }
   dialogVisible.value = true
 }
 
@@ -96,7 +111,6 @@ const handleDelete = async (id: number) => {
   } catch (e) {}
 }
 
-watch([page, pageSize], () => fetchList())
 onMounted(fetchList)
 </script>
 
@@ -108,21 +122,16 @@ onMounted(fetchList)
     </div>
 
     <div class="search-bar">
-      <el-input v-model="search" placeholder="搜索姓名/身份证/户号" style="width: 280px" @keyup.enter="handleSearch" />
+      <el-input v-model="search" placeholder="搜索姓名/身份证" style="width: 280px" @keyup.enter="handleSearch" />
       <el-button type="primary" @click="handleSearch">搜索</el-button>
     </div>
 
     <el-table :data="list" v-loading="loading" stripe>
       <el-table-column prop="name" label="姓名" />
       <el-table-column prop="gender" label="性别" width="60" />
-      <el-table-column prop="age" label="年龄" width="60" />
       <el-table-column prop="id_card" label="身份证号" width="180" />
-      <el-table-column prop="household_id" label="户号" />
-      <el-table-column prop="is_householder" label="户主" width="70">
-        <template #default="{ row }">
-          {{ row.is_householder === 1 ? '是' : '否' }}
-        </template>
-      </el-table-column>
+      <el-table-column prop="household_no" label="户号" />
+      <el-table-column prop="relation_to_head" label="与户主关系" width="100" />
       <el-table-column prop="phone" label="电话" />
       <el-table-column prop="occupation" label="职业" />
       <el-table-column label="操作" width="180" fixed="right">
@@ -166,8 +175,8 @@ onMounted(fetchList)
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="年龄">
-              <el-input-number v-model="form.age" :min="0" style="width: 100%" />
+            <el-form-item label="出生日期">
+              <el-input v-model="form.birth_date" placeholder="如：1990-01-01" />
             </el-form-item>
           </el-col>
         </el-row>
@@ -190,23 +199,17 @@ onMounted(fetchList)
             </el-form-item>
           </el-col>
           <el-col :span="12">
-            <el-form-item label="户号">
-              <el-input v-model="form.household_id" />
+            <el-form-item label="所属户">
+              <el-select v-model="form.household_id" style="width: 100%" placeholder="请选择户" clearable>
+                <el-option v-for="hh in households" :key="hh.id" :label="hh.household_no" :value="hh.id" />
+              </el-select>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12">
             <el-form-item label="与户主关系">
-              <el-input v-model="form.household_relation" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="是否户主">
-              <el-radio-group v-model="form.is_householder">
-                <el-radio :label="1">是</el-radio>
-                <el-radio :label="0">否</el-radio>
-              </el-radio-group>
+              <el-input v-model="form.relation_to_head" placeholder="如：本人、配偶、子女" />
             </el-form-item>
           </el-col>
         </el-row>

@@ -149,7 +149,7 @@ onMounted(fetchList)
     </div>
 
     <div class="search-bar">
-      <el-input v-model="search" placeholder="搜索卡号/开户行/备注" style="width: 280px" @keyup.enter="handleSearch" />
+      <el-input v-model="search" placeholder="搜索村民/卡号/开户行/备注" style="width: 280px" @keyup.enter="handleSearch" />
       <el-button type="primary" @click="handleSearch">搜索</el-button>
     </div>
 

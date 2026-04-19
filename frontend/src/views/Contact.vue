@@ -203,10 +203,10 @@ onMounted(fetchList)
           <el-input v-model="form.value" />
         </el-form-item>
         <el-form-item label="主联系方式">
-          <radio-group v-model="form.is_primary">
+          <el-radio-group v-model="form.is_primary">
             <el-radio :label="1">是</el-radio>
             <el-radio :label="0">否</el-radio>
-          </radio-group>
+          </el-radio-group>
         </el-form-item>
         <el-form-item label="备注">
           <el-input v-model="form.remark" type="textarea" :rows="2" />

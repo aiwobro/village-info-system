@@ -5,6 +5,22 @@ import { householdApi } from '../api/household'
 import { naturalVillageApi } from '../api/naturalVillage'
 import { adminVillageApi } from '../api/adminVillage'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import ImportDialog from '../components/ImportDialog.vue'
+
+const importDialogVisible = ref(false)
+const importFields = [
+  { label: '姓名', field: 'name', required: true },
+  { label: '身份证号', field: 'id_card' },
+  { label: '性别', field: 'gender' },
+  { label: '出生日期', field: 'birth_date' },
+  { label: '民族', field: 'ethnicity' },
+  { label: '文化程度', field: 'education' },
+  { label: '职业', field: 'occupation' },
+  { label: '所属户', field: 'household_id' },
+  { label: '与户主关系', field: 'relation_to_head' },
+  { label: '住址', field: 'address' },
+  { label: '备注', field: 'remark' },
+]
 
 const list = ref<any[]>([])
 const households = ref<any[]>([])
@@ -118,7 +134,10 @@ onMounted(fetchList)
   <div class="page">
     <div class="toolbar">
       <h2>👥 村民管理</h2>
-      <el-button type="primary" @click="openAdd">新增村民</el-button>
+      <div style="display: flex; gap: 8px;">
+        <el-button @click="importDialogVisible = true">批量导入</el-button>
+        <el-button type="primary" @click="openAdd">新增村民</el-button>
+      </div>
     </div>
 
     <div class="search-bar">
@@ -225,6 +244,14 @@ onMounted(fetchList)
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <ImportDialog
+      v-model="importDialogVisible"
+      title="批量导入村民"
+      :fields="importFields"
+      :api="villagerApi"
+      @success="fetchList"
+    />
   </div>
 </template>
 

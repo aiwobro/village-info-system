@@ -3,6 +3,18 @@ import { ref, onMounted } from 'vue'
 import { bankAccountApi } from '../api/bankAccount'
 import { villagerApi } from '../api/villager'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import ImportDialog from '../components/ImportDialog.vue'
+
+const importDialogVisible = ref(false)
+const importFields = [
+  { label: '村民', field: 'villager_id', required: true },
+  { label: '开户行', field: 'bank_name', required: true },
+  { label: '开户名', field: 'account_holder', required: true },
+  { label: '卡号', field: 'account_number_encrypted' },
+  { label: '账户类型', field: 'account_type' },
+  { label: '状态', field: 'is_active' },
+  { label: '备注', field: 'remark' },
+]
 
 const list = ref<any[]>([])
 const villagers = ref<any[]>([])
@@ -93,7 +105,10 @@ onMounted(fetchList)
   <div class="page">
     <div class="toolbar">
       <h2>💳 银行账号</h2>
-      <el-button type="primary" @click="openAdd">新增账号</el-button>
+      <div style="display: flex; gap: 8px;">
+        <el-button @click="importDialogVisible = true">批量导入</el-button>
+        <el-button type="primary" @click="openAdd">新增账号</el-button>
+      </div>
     </div>
 
     <el-table :data="list" v-loading="loading" stripe>
@@ -152,6 +167,14 @@ onMounted(fetchList)
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <ImportDialog
+      v-model="importDialogVisible"
+      title="批量导入银行账号"
+      :fields="importFields"
+      :api="bankAccountApi"
+      @success="fetchList"
+    />
   </div>
 </template>
 

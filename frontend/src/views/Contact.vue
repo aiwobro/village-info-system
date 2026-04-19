@@ -3,6 +3,16 @@ import { ref, onMounted } from 'vue'
 import { contactApi } from '../api/contact'
 import { villagerApi } from '../api/villager'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import ImportDialog from '../components/ImportDialog.vue'
+
+const importDialogVisible = ref(false)
+const importFields = [
+  { label: '村民', field: 'villager_id', required: true },
+  { label: '类型', field: 'type', required: true },
+  { label: '联系方式', field: 'value', required: true },
+  { label: '主联系方式', field: 'is_primary' },
+  { label: '备注', field: 'remark' },
+]
 
 const list = ref<any[]>([])
 const villagers = ref<any[]>([])
@@ -100,7 +110,10 @@ onMounted(fetchList)
   <div class="page">
     <div class="toolbar">
       <h2>📞 联系方式</h2>
-      <el-button type="primary" @click="openAdd">新增联系方式</el-button>
+      <div style="display: flex; gap: 8px;">
+        <el-button @click="importDialogVisible = true">批量导入</el-button>
+        <el-button type="primary" @click="openAdd">新增联系方式</el-button>
+      </div>
     </div>
 
     <el-table :data="list" v-loading="loading" stripe>
@@ -151,6 +164,14 @@ onMounted(fetchList)
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <ImportDialog
+      v-model="importDialogVisible"
+      title="批量导入联系方式"
+      :fields="importFields"
+      :api="contactApi"
+      @success="fetchList"
+    />
   </div>
 </template>
 

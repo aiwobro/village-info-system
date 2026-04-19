@@ -3,6 +3,16 @@ import { ref, onMounted } from 'vue'
 import { naturalVillageApi } from '../api/naturalVillage'
 import { adminVillageApi } from '../api/adminVillage'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import ImportDialog from '../components/ImportDialog.vue'
+
+const importDialogVisible = ref(false)
+const importFields = [
+  { label: '村名', field: 'name', required: true },
+  { label: '所属行政村', field: 'admin_village_id', required: true },
+  { label: '负责人', field: 'leader' },
+  { label: '联系电话', field: 'phone' },
+  { label: '描述', field: 'description' },
+]
 
 const list = ref<any[]>([])
 const adminVillages = ref<any[]>([])
@@ -90,7 +100,10 @@ onMounted(fetchList)
   <div class="page">
     <div class="toolbar">
       <h2>🏡 自然村管理</h2>
-      <el-button type="primary" @click="openAdd">新增自然村</el-button>
+      <div style="display: flex; gap: 8px;">
+        <el-button @click="importDialogVisible = true">批量导入</el-button>
+        <el-button type="primary" @click="openAdd">新增自然村</el-button>
+      </div>
     </div>
 
     <el-table :data="list" v-loading="loading" stripe>
@@ -138,6 +151,14 @@ onMounted(fetchList)
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
     </el-dialog>
+
+    <ImportDialog
+      v-model="importDialogVisible"
+      title="批量导入自然村"
+      :fields="importFields"
+      :api="naturalVillageApi"
+      @success="fetchList"
+    />
   </div>
 </template>
 

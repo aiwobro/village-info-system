@@ -27,6 +27,14 @@ const previewColumns = ref<string[]>([])
 const fileName = ref('')
 const errorRows = ref<{ row: number; msg: string }[]>([])
 
+const downloadTemplate = () => {
+  const headers = props.fields.map(f => f.label)
+  const worksheet = XLSX.utils.aoa_to_sheet([headers])
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, worksheet, '导入模板')
+  XLSX.writeFile(workbook, `${props.title}.xlsx`)
+}
+
 const handleFileChange = async (event: Event) => {
   const input = event.target as HTMLInputElement
   const file = input.files?.[0]
@@ -135,18 +143,23 @@ const handleClose = () => {
     :before-close="handleClose"
   >
     <div class="upload-area">
-      <input
-        type="file"
-        accept=".xlsx,.xls"
-        @change="handleFileChange"
-        style="display: none"
-        id="import-file-input"
-      />
-      <label for="import-file-input" class="upload-label">
-        <el-icon size="32"><Upload /></el-icon>
-        <span>点击选择 Excel 文件</span>
-        <span class="hint">支持 .xlsx .xls</span>
-      </label>
+      <div class="upload-actions">
+        <input
+          type="file"
+          accept=".xlsx,.xls"
+          @change="handleFileChange"
+          style="display: none"
+          id="import-file-input"
+        />
+        <label for="import-file-input" class="upload-label">
+          <el-icon size="24"><Upload /></el-icon>
+          <span>选择 Excel 文件</span>
+          <span class="hint">支持 .xlsx .xls</span>
+        </label>
+        <el-button @click="downloadTemplate" type="info" plain>
+          <el-icon><Download /></el-icon> 下载模板
+        </el-button>
+      </div>
       <div v-if="fileName" class="file-name">
         已选: {{ fileName }}
       </div>
@@ -211,6 +224,11 @@ const handleClose = () => {
 <style scoped>
 .upload-area {
   margin-bottom: 16px;
+}
+.upload-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
 }
 .upload-label {
   display: flex;

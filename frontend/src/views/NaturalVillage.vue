@@ -28,7 +28,7 @@ const importTransform = (record: any) => {
 
 const openImport = async () => {
   importDialogVisible.value = true
-  const avs = await adminVillageApi.getAll({ limit: 100 }) as any[]
+  const avs = ((await adminVillageApi.getAll({ limit: 100 })) as any).items || []
   importAdminVillages.value = avs
 }
 
@@ -56,11 +56,11 @@ const rules = {
 const fetchList = async () => {
   loading.value = true
   try {
-    const [villages, admins] = await Promise.all([
-      naturalVillageApi.getAll({ limit: 1000 }) as Promise<any[]>,
-      adminVillageApi.getAll({ limit: 100 }) as Promise<any[]>,
-    ])
-    list.value = villages.map(v => ({
+    const nvResult = (await naturalVillageApi.getAll({ limit: 1000 })) as any
+    const avResult = (await adminVillageApi.getAll({ limit: 100 })) as any
+    const villages = nvResult.items || []
+    const admins = avResult.items || []
+    list.value = villages.map((v: any) => ({
       ...v,
       admin_village_name: admins.find((a: any) => a.id === v.admin_village_id)?.name || '-',
     }))

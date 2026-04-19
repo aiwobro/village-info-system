@@ -4,7 +4,10 @@ from app.schemas.natural_village import NaturalVillageCreate, NaturalVillageUpda
 
 
 def get_all(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(NaturalVillage).offset(skip).limit(limit).all()
+    query = db.query(NaturalVillage)
+    total = query.count()
+    items = query.offset(skip).limit(limit).all()
+    return {"items": items, "total": total}
 
 
 def get_by_id(db: Session, id: int):

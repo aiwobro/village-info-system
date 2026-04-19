@@ -153,6 +153,8 @@ onMounted(fetchList)
       :total="total"
       :page-sizes="[20, 50, 100]"
       layout="total, sizes, prev, pager, next"
+      @current-change="fetchList"
+      @size-change="fetchList"
       style="margin-top: 16px"
     />
 

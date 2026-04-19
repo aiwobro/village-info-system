@@ -185,6 +185,8 @@ onMounted(fetchList)
       :page-sizes="[20, 50, 100]"
       layout="total, sizes, prev, pager, next"
       style="margin-top: 16px"
+      @current-change="fetchList"
+      @size-change="() => { page = 1; fetchList(); }"
     />
 
     <el-dialog v-model="dialogVisible" :title="isEdit ? '编辑村民' : '新增村民'" width="700px">

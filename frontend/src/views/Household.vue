@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import { householdApi } from '../api/household'
 import { naturalVillageApi } from '../api/naturalVillage'
 import { adminVillageApi } from '../api/adminVillage'
+import { villagerApi } from '../api/villager'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ImportDialog from '../components/ImportDialog.vue'
 
@@ -34,6 +35,26 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
+
+// 成员弹窗
+const membersDialogVisible = ref(false)
+const members = ref<any[]>([])
+const membersLoading = ref(false)
+const currentHousehold = ref('')
+
+const openMembers = async (row: any) => {
+  currentHousehold.value = row.household_no
+  membersDialogVisible.value = true
+  membersLoading.value = true
+  try {
+    const res = await villagerApi.getAll({ household_id: row.id, limit: 1000 }) as any
+    members.value = res.items || []
+  } catch (e) {
+    members.value = []
+  } finally {
+    membersLoading.value = false
+  }
+}
 
 const form = ref({
   id: null as number | null,
@@ -138,8 +159,9 @@ onMounted(fetchList)
       <el-table-column prop="admin_village_name" label="行政村" />
       <el-table-column prop="natural_village_name" label="自然村" />
       <el-table-column prop="address" label="地址" />
-      <el-table-column label="操作" width="180">
+      <el-table-column label="操作" width="240">
         <template #default="{ row }">
+          <el-button size="small" @click="openMembers(row)">成员</el-button>
           <el-button size="small" @click="openEdit(row)">编辑</el-button>
           <el-button size="small" type="danger" @click="handleDelete(row)">删除</el-button>
         </template>
@@ -175,6 +197,20 @@ onMounted(fetchList)
         <el-button @click="dialogVisible = false">取消</el-button>
         <el-button type="primary" @click="handleSubmit">确定</el-button>
       </template>
+    </el-dialog>
+
+    <el-dialog v-model="membersDialogVisible" :title="'户 ' + currentHousehold + ' 的成员'" width="700px">
+      <el-table :data="members" v-loading="membersLoading" stripe max-height="400">
+        <el-table-column prop="name" label="姓名" />
+        <el-table-column prop="gender" label="性别" width="60" />
+        <el-table-column prop="id_card" label="身份证号" width="180" />
+        <el-table-column prop="relation_to_head" label="与户主关系" width="100" />
+        <el-table-column prop="phone" label="电话" />
+        <el-table-column prop="occupation" label="职业" />
+      </el-table>
+      <div v-if="members.length === 0 && !membersLoading" style="text-align: center; color: #909399; padding: 20px;">
+        暂无成员
+      </div>
     </el-dialog>
 
     <ImportDialog

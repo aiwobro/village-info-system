@@ -38,7 +38,8 @@ const rules = {
 const fetchList = async () => {
   loading.value = true
   try {
-    list.value = await adminVillageApi.getAll({ limit: 100 }) as any[]
+    const res = (await adminVillageApi.getAll({ limit: 100 })) as any
+    list.value = res.items || []
   } catch (e) {
     console.error(e)
   } finally {
@@ -79,7 +80,7 @@ const handleSubmit = async () => {
 const handleDelete = async (row: any) => {
   try {
     // 检查是否有关联的自然村
-    const naturalVillages = await naturalVillageApi.getAll({ limit: 1000 }) as any[]
+    const naturalVillages = ((await naturalVillageApi.getAll({ limit: 1000 })) as any).items || []
     const hasChildren = naturalVillages.some((v: any) => v.admin_village_id === row.id)
     if (hasChildren) {
       ElMessage.warning('该行政村下有自然村，无法删除')

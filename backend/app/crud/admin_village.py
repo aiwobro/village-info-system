@@ -4,7 +4,10 @@ from app.schemas.admin_village import AdminVillageCreate, AdminVillageUpdate
 
 
 def get_all(db: Session, skip: int = 0, limit: int = 100):
-    return db.query(AdminVillage).offset(skip).limit(limit).all()
+    query = db.query(AdminVillage)
+    total = query.count()
+    items = query.offset(skip).limit(limit).all()
+    return {"items": items, "total": total}
 
 
 def get_by_id(db: Session, id: int):

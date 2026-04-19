@@ -10,8 +10,8 @@ router = APIRouter(prefix="/villagers", tags=["村民管理"])
 
 
 @router.get("")
-def get_all_api(skip: int = 0, limit: int = 100, search: str = Query(None), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return crud.get_all(db, skip=skip, limit=limit, search=search)
+def get_all_api(skip: int = 0, limit: int = 100, search: str = Query(None), household_id: int = Query(None), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return crud.get_all(db, skip=skip, limit=limit, search=search, household_id=household_id)
 
 
 @router.get("/{id}", response_model=VillagerOut)

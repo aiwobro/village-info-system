@@ -4,10 +4,12 @@ from app.models.villager import Villager
 from app.schemas.villager import VillagerCreate, VillagerUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None):
+def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None, household_id: int = None):
     q = db.query(Villager)
     if search:
         q = q.filter(Villager.name.contains(search))
+    if household_id:
+        q = q.filter(Villager.household_id == household_id)
     total = q.count()
     items = q.offset(skip).limit(limit).all()
     return {"items": items, "total": total}

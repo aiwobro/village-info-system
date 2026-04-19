@@ -41,9 +41,13 @@ const membersDialogVisible = ref(false)
 const members = ref<any[]>([])
 const membersLoading = ref(false)
 const currentHousehold = ref('')
+const currentHouseholdId = ref<number | null>(null)
+const currentHeadId = ref<number | null>(null)
 
 const openMembers = async (row: any) => {
   currentHousehold.value = row.household_no
+  currentHouseholdId.value = row.id
+  currentHeadId.value = row.head_id
   membersDialogVisible.value = true
   membersLoading.value = true
   try {
@@ -53,6 +57,17 @@ const openMembers = async (row: any) => {
     members.value = []
   } finally {
     membersLoading.value = false
+  }
+}
+
+const handleSetHead = async (villager: any) => {
+  try {
+    await householdApi.update(currentHouseholdId.value!, { head_id: villager.id })
+    currentHeadId.value = villager.id
+    ElMessage.success('已将 ' + villager.name + ' 设为户主')
+    fetchList()
+  } catch (e) {
+    ElMessage.error('设置失败')
   }
 }
 
@@ -156,6 +171,8 @@ onMounted(fetchList)
 
     <el-table :data="list" v-loading="loading" stripe>
       <el-table-column prop="household_no" label="户号" />
+      <el-table-column prop="head_name" label="户主姓名" />
+      <el-table-column prop="member_count" label="户内人数" width="90" />
       <el-table-column prop="admin_village_name" label="行政村" />
       <el-table-column prop="natural_village_name" label="自然村" />
       <el-table-column prop="address" label="地址" />

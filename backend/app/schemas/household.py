@@ -22,6 +22,8 @@ class HouseholdOut(HouseholdBase):
     id: int
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    head_name: Optional[str] = None
+    member_count: int = 0
 
     class Config:
         from_attributes = True

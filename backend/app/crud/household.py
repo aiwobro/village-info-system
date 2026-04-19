@@ -4,24 +4,41 @@ from app.models.household import Household
 from app.schemas.household import HouseholdCreate, HouseholdUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100):
-    # 原生SQL：查户同时拿到户主姓名和户内人数
-    sql = text("""
+def get_all(db: Session, skip: int = 0, limit: int = 100, natural_village_id: int = None, admin_village_id: int = None):
+    # 动态WHERE条件
+    where = ""
+    params: dict = {"skip": skip, "limit": limit}
+    if natural_village_id:
+        where += " AND h.natural_village_id = :natural_village_id"
+        params["natural_village_id"] = natural_village_id
+    if admin_village_id:
+        where += " AND nv.admin_village_id = :admin_village_id"
+        params["admin_village_id"] = admin_village_id
+
+    sql = text(f"""
         SELECT
             h.id, h.household_no, h.natural_village_id, h.head_id, h.address,
             h.created_at, h.updated_at,
             head.name as head_name,
             COUNT(m.id) as member_count
         FROM households h
+        LEFT JOIN natural_villages nv ON h.natural_village_id = nv.id
         LEFT JOIN villagers head ON h.id = head.household_id AND head.relation_to_head = '户主'
         LEFT JOIN villagers m ON h.id = m.household_id
+        WHERE 1=1 {where}
         GROUP BY h.id, head.name
         ORDER BY h.id
         OFFSET :skip LIMIT :limit
     """)
-    rows = db.execute(sql, {"skip": skip, "limit": limit}).fetchall()
+    rows = db.execute(sql, params).fetchall()
 
-    total = db.query(Household).count()
+    # total也要带筛选条件
+    count_sql = text(f"""
+        SELECT COUNT(*) FROM households h
+        LEFT JOIN natural_villages nv ON h.natural_village_id = nv.id
+        WHERE 1=1 {where}
+    """)
+    total = db.execute(count_sql, {k: v for k, v in params.items() if k in ("natural_village_id", "admin_village_id")}).scalar()
 
     result = []
     for r in rows:
@@ -37,6 +54,33 @@ def get_all(db: Session, skip: int = 0, limit: int = 100):
             "member_count": r.member_count,
         })
     return {"items": result, "total": total}
+
+
+def get_stats(db: Session, natural_village_id: int = None, admin_village_id: int = None):
+    """返回当前筛选条件下的户数和总人数"""
+    where = ""
+    params: dict = {}
+    if natural_village_id:
+        where += " AND h.natural_village_id = :natural_village_id"
+        params["natural_village_id"] = natural_village_id
+    if admin_village_id:
+        where += " AND nv.admin_village_id = :admin_village_id"
+        params["admin_village_id"] = admin_village_id
+
+    household_count = db.execute(text(f"""
+        SELECT COUNT(*) FROM households h
+        LEFT JOIN natural_villages nv ON h.natural_village_id = nv.id
+        WHERE 1=1 {where}
+    """), params).scalar()
+
+    villager_count = db.execute(text(f"""
+        SELECT COUNT(*) FROM villagers v
+        LEFT JOIN households h ON v.household_id = h.id
+        LEFT JOIN natural_villages nv ON h.natural_village_id = nv.id
+        WHERE v.household_id IS NOT NULL AND 1=1 {where}
+    """), params).scalar()
+
+    return {"household_count": household_count or 0, "villager_count": villager_count or 0}
 
 
 def get_by_id(db: Session, id: int):

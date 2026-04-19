@@ -1,8 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.schemas.household import HouseholdCreate, HouseholdUpdate, HouseholdOut
-from app.crud.household import get_all, get_by_id, create, update, delete
+from app.crud.household import get_all, get_by_id, create, update, delete, get_stats
 from app.models.user import User
 from app.api.auth import get_current_user
 
@@ -10,8 +10,13 @@ router = APIRouter(prefix="/households", tags=["户管理"])
 
 
 @router.get("")
-def get_all_api(skip: int = 0, limit: int = 100, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return get_all(db, skip=skip, limit=limit)
+def get_all_api(skip: int = 0, limit: int = 100, natural_village_id: int = Query(None), admin_village_id: int = Query(None), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return get_all(db, skip=skip, limit=limit, natural_village_id=natural_village_id, admin_village_id=admin_village_id)
+
+
+@router.get("/stats")
+def get_stats_api(natural_village_id: int = Query(None), admin_village_id: int = Query(None), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return get_stats(db, natural_village_id=natural_village_id, admin_village_id=admin_village_id)
 
 
 @router.get("/{id}", response_model=HouseholdOut)

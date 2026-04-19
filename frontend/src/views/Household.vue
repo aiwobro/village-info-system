@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { householdApi } from '../api/household'
 import { naturalVillageApi } from '../api/naturalVillage'
 import { adminVillageApi } from '../api/adminVillage'
@@ -26,8 +26,16 @@ const importTransform = (record: any) => {
   return record
 }
 
-const list = ref<any[]>([])
+// 统计数据
+const stats = ref({ household_count: 0, villager_count: 0 })
+
+// 筛选
+const adminVillages = ref<any[]>([])
 const naturalVillages = ref<any[]>([])
+const filterAdminVillage = ref<number | null>(null)
+const filterNaturalVillage = ref<number | null>(null)
+
+const list = ref<any[]>([])
 const total = ref(0)
 const page = ref(1)
 const pageSize = ref(20)
@@ -41,13 +49,9 @@ const membersDialogVisible = ref(false)
 const members = ref<any[]>([])
 const membersLoading = ref(false)
 const currentHousehold = ref('')
-const currentHouseholdId = ref<number | null>(null)
-const currentHeadId = ref<number | null>(null)
 
 const openMembers = async (row: any) => {
   currentHousehold.value = row.household_no
-  currentHouseholdId.value = row.id
-  currentHeadId.value = row.head_id
   membersDialogVisible.value = true
   membersLoading.value = true
   try {
@@ -57,17 +61,6 @@ const openMembers = async (row: any) => {
     members.value = []
   } finally {
     membersLoading.value = false
-  }
-}
-
-const handleSetHead = async (villager: any) => {
-  try {
-    await householdApi.update(currentHouseholdId.value!, { head_id: villager.id })
-    currentHeadId.value = villager.id
-    ElMessage.success('已将 ' + villager.name + ' 设为户主')
-    fetchList()
-  } catch (e) {
-    ElMessage.error('设置失败')
   }
 }
 
@@ -84,19 +77,38 @@ const rules = {
   natural_village_id: [{ required: true, message: '请选择所属自然村', trigger: 'change' }],
 }
 
+const fetchStats = async () => {
+  try {
+    const res = await householdApi.getStats({ admin_village_id: filterAdminVillage.value ?? undefined, natural_village_id: filterNaturalVillage.value ?? undefined }) as any
+    stats.value = res
+  } catch (e) {
+    stats.value = { household_count: 0, villager_count: 0 }
+  }
+}
+
 const fetchList = async () => {
   loading.value = true
   try {
     const skip = (page.value - 1) * pageSize.value
-    const [data, nvs, avs] = await Promise.all([
-      householdApi.getAll({ skip, limit: pageSize.value }),
-      naturalVillageApi.getAll({ limit: 1000 }) as Promise<any>,
+    const params: any = { skip, limit: pageSize.value }
+    if (filterAdminVillage.value) params.admin_village_id = filterAdminVillage.value
+    if (filterNaturalVillage.value) params.natural_village_id = filterNaturalVillage.value
+
+    const [data, avs] = await Promise.all([
+      householdApi.getAll(params) as Promise<any>,
       adminVillageApi.getAll({ limit: 100 }) as Promise<any>,
     ])
-    naturalVillages.value = nvs.items || []
-    list.value = (data.items || []).map(h => {
-      const nv = naturalVillages.value.find((n: any) => n.id === h.natural_village_id)
-      const av = nv ? (avs.items || []).find((a: any) => a.id === nv.admin_village_id) : null
+    adminVillages.value = avs.items || []
+
+    // 过滤后的自然村列表
+    let nvsForFilter = naturalVillages.value
+    if (filterAdminVillage.value) {
+      nvsForFilter = naturalVillages.value.filter((n: any) => n.admin_village_id === filterAdminVillage.value)
+    }
+
+    list.value = (data.items || []).map((h: any) => {
+      const nv = nvsForFilter.find((n: any) => n.id === h.natural_village_id)
+      const av = adminVillages.value.find((a: any) => a.id === (nv?.admin_village_id || h.natural_village_id))
       return {
         ...h,
         natural_village_name: nv?.name || '-',
@@ -110,6 +122,27 @@ const fetchList = async () => {
     loading.value = false
   }
 }
+
+const fetchAllVillages = async () => {
+  const avs = await adminVillageApi.getAll({ limit: 100 }) as any
+  adminVillages.value = avs.items || []
+  const nvs = await naturalVillageApi.getAll({ limit: 1000 }) as any
+  naturalVillages.value = nvs.items || []
+}
+
+// 切换行政村筛选 → 重置自然村筛选
+watch(filterAdminVillage, () => {
+  filterNaturalVillage.value = null
+  page.value = 1
+  fetchList()
+  fetchStats()
+})
+
+watch(filterNaturalVillage, () => {
+  page.value = 1
+  fetchList()
+  fetchStats()
+})
 
 const openAdd = () => {
   isEdit.value = false
@@ -137,6 +170,7 @@ const handleSubmit = async () => {
       }
       dialogVisible.value = false
       fetchList()
+      fetchStats()
     } catch (e) {}
   })
 }
@@ -147,6 +181,7 @@ const handleDelete = async (row: any) => {
     await householdApi.delete(row.id)
     ElMessage.success('删除成功')
     fetchList()
+    fetchStats()
   } catch (e) {}
 }
 
@@ -156,7 +191,11 @@ const openImport = async () => {
   importNaturalVillages.value = nvs.items || []
 }
 
-onMounted(fetchList)
+onMounted(async () => {
+  await fetchAllVillages()
+  fetchList()
+  fetchStats()
+})
 </script>
 
 <template>
@@ -167,6 +206,29 @@ onMounted(fetchList)
         <el-button @click="openImport">批量导入</el-button>
         <el-button type="primary" @click="openAdd">新增户</el-button>
       </div>
+    </div>
+
+    <!-- 统计行 -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <span class="stat-num">{{ stats.household_count }}</span>
+        <span class="stat-text">户</span>
+      </div>
+      <div class="stat-divider" />
+      <div class="stat-item">
+        <span class="stat-num">{{ stats.villager_count }}</span>
+        <span class="stat-text">人</span>
+      </div>
+    </div>
+
+    <!-- 筛选行 -->
+    <div class="filter-bar">
+      <el-select v-model="filterAdminVillage" placeholder="按行政村筛选" clearable style="width: 200px">
+        <el-option v-for="av in adminVillages" :key="av.id" :label="av.name" :value="av.id" />
+      </el-select>
+      <el-select v-model="filterNaturalVillage" placeholder="按自然村筛选" clearable style="width: 200px">
+        <el-option v-for="nv in (filterAdminVillage ? naturalVillages.filter((n: any) => n.admin_village_id === filterAdminVillage) : naturalVillages)" :key="nv.id" :label="nv.name" :value="nv.id" />
+      </el-select>
     </div>
 
     <el-table :data="list" v-loading="loading" stripe>
@@ -250,4 +312,37 @@ onMounted(fetchList)
   margin-bottom: 16px;
 }
 .toolbar h2 { margin: 0; }
+.stats-bar {
+  display: flex;
+  align-items: center;
+  background: #f5f7fa;
+  border-radius: 8px;
+  padding: 12px 24px;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+.stat-item {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+}
+.stat-num {
+  font-size: 24px;
+  font-weight: bold;
+  color: #409eff;
+}
+.stat-text {
+  font-size: 14px;
+  color: #606266;
+}
+.stat-divider {
+  width: 1px;
+  height: 24px;
+  background: #dcdfe6;
+}
+.filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
 </style>

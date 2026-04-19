@@ -24,70 +24,82 @@ onMounted(() => {
     </div>
     <el-row :gutter="16" class="stats-row">
       <el-col :xs="12" :sm="8" :md="4" :lg="4">
-        <el-card shadow="hover">
-          <div class="stat-card">
-            <el-icon class="stat-icon" color="#409eff"><LocationInformation /></el-icon>
-            <div class="stat-info">
-              <div class="stat-value">{{ dataStore.stats.adminVillages }}</div>
-              <div class="stat-label">行政村</div>
+        <router-link to="/village" class="stat-link">
+          <el-card shadow="hover">
+            <div class="stat-card">
+              <el-icon class="stat-icon" color="#409eff"><LocationInformation /></el-icon>
+              <div class="stat-info">
+                <div class="stat-value">{{ dataStore.stats.adminVillages }}</div>
+                <div class="stat-label">行政村</div>
+              </div>
             </div>
-          </div>
-        </el-card>
+          </el-card>
+        </router-link>
       </el-col>
       <el-col :xs="12" :sm="8" :md="4" :lg="4">
-        <el-card shadow="hover">
-          <div class="stat-card">
-            <el-icon class="stat-icon" color="#909399"><OfficeBuilding /></el-icon>
-            <div class="stat-info">
-              <div class="stat-value">{{ dataStore.stats.naturalVillages }}</div>
-              <div class="stat-label">自然村</div>
+        <router-link to="/natural-village" class="stat-link">
+          <el-card shadow="hover">
+            <div class="stat-card">
+              <el-icon class="stat-icon" color="#909399"><OfficeBuilding /></el-icon>
+              <div class="stat-info">
+                <div class="stat-value">{{ dataStore.stats.naturalVillages }}</div>
+                <div class="stat-label">自然村</div>
+              </div>
             </div>
-          </div>
-        </el-card>
+          </el-card>
+        </router-link>
       </el-col>
       <el-col :xs="12" :sm="8" :md="4" :lg="4">
-        <el-card shadow="hover">
-          <div class="stat-card">
-            <el-icon class="stat-icon" color="#67c23a"><House /></el-icon>
-            <div class="stat-info">
-              <div class="stat-value">{{ dataStore.stats.households }}</div>
-              <div class="stat-label">户</div>
+        <router-link to="/household" class="stat-link">
+          <el-card shadow="hover">
+            <div class="stat-card">
+              <el-icon class="stat-icon" color="#67c23a"><House /></el-icon>
+              <div class="stat-info">
+                <div class="stat-value">{{ dataStore.stats.households }}</div>
+                <div class="stat-label">户</div>
+              </div>
             </div>
-          </div>
-        </el-card>
+          </el-card>
+        </router-link>
       </el-col>
       <el-col :xs="12" :sm="8" :md="4" :lg="4">
-        <el-card shadow="hover">
-          <div class="stat-card">
-            <el-icon class="stat-icon" color="#e6a23c"><User /></el-icon>
-            <div class="stat-info">
-              <div class="stat-value">{{ dataStore.stats.villagers }}</div>
-              <div class="stat-label">村民</div>
+        <router-link to="/villagers" class="stat-link">
+          <el-card shadow="hover">
+            <div class="stat-card">
+              <el-icon class="stat-icon" color="#e6a23c"><User /></el-icon>
+              <div class="stat-info">
+                <div class="stat-value">{{ dataStore.stats.villagers }}</div>
+                <div class="stat-label">村民</div>
+              </div>
             </div>
-          </div>
-        </el-card>
+          </el-card>
+        </router-link>
       </el-col>
       <el-col :xs="12" :sm="8" :md="4" :lg="4">
-        <el-card shadow="hover">
-          <div class="stat-card">
-            <el-icon class="stat-icon" color="#f56c6c"><Box /></el-icon>
-            <div class="stat-info">
-              <div class="stat-value">{{ dataStore.stats.assets }}</div>
-              <div class="stat-label">资产</div>
+        <router-link to="/assets" class="stat-link">
+          <el-card shadow="hover">
+            <div class="stat-card">
+              <el-icon class="stat-icon" color="#f56c6c"><Box /></el-icon>
+              <div class="stat-info">
+                <div class="stat-value">{{ dataStore.stats.assets }}</div>
+                <div class="stat-label">资产</div>
+              </div>
             </div>
-          </div>
-        </el-card>
+          </el-card>
+        </router-link>
       </el-col>
       <el-col :xs="12" :sm="8" :md="4" :lg="4">
-        <el-card shadow="hover">
-          <div class="stat-card">
-            <el-icon class="stat-icon" color="#909399"><Grid /></el-icon>
-            <div class="stat-info">
-              <div class="stat-value">{{ dataStore.stats.resources }}</div>
-              <div class="stat-label">资源</div>
+        <router-link to="/resources" class="stat-link">
+          <el-card shadow="hover">
+            <div class="stat-card">
+              <el-icon class="stat-icon" color="#909399"><Grid /></el-icon>
+              <div class="stat-info">
+                <div class="stat-value">{{ dataStore.stats.resources }}</div>
+                <div class="stat-label">资源</div>
+              </div>
             </div>
-          </div>
-        </el-card>
+          </el-card>
+        </router-link>
       </el-col>
     </el-row>
   </div>
@@ -119,11 +131,20 @@ onMounted(() => {
 .stats-row {
   margin-bottom: 16px;
 }
+.stat-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
 .stat-card {
   display: flex;
   align-items: center;
   gap: 12px;
   min-height: 72px;
+}
+.stat-link:hover .el-card {
+  background-color: #f5f7fa;
 }
 .stat-icon {
   font-size: 32px;

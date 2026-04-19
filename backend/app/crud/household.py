@@ -4,7 +4,7 @@ from app.models.household import Household
 from app.schemas.household import HouseholdCreate, HouseholdUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100, natural_village_id: int = None, admin_village_id: int = None):
+def get_all(db: Session, skip: int = 0, limit: int = 100, natural_village_id: int = None, admin_village_id: int = None, search: str = None):
     # 动态WHERE条件
     where = ""
     params: dict = {"skip": skip, "limit": limit}
@@ -14,6 +14,9 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, natural_village_id: in
     if admin_village_id:
         where += " AND nv.admin_village_id = :admin_village_id"
         params["admin_village_id"] = admin_village_id
+    if search:
+        where += " AND h.id IN (SELECT household_id FROM villagers WHERE (name ILIKE :search OR id_card ILIKE :search) AND household_id IS NOT NULL)"
+        params["search"] = f"%{search}%"
 
     sql = text(f"""
         SELECT
@@ -36,9 +39,10 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, natural_village_id: in
     count_sql = text(f"""
         SELECT COUNT(*) FROM households h
         LEFT JOIN natural_villages nv ON h.natural_village_id = nv.id
+        LEFT JOIN villagers head ON h.id = head.household_id AND head.relation_to_head = '户主'
         WHERE 1=1 {where}
     """)
-    total = db.execute(count_sql, {k: v for k, v in params.items() if k in ("natural_village_id", "admin_village_id")}).scalar()
+    total = db.execute(count_sql, {k: v for k, v in params.items() if k in ("natural_village_id", "admin_village_id", "search")}).scalar()
 
     result = []
     for r in rows:

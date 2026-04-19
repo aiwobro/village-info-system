@@ -34,6 +34,7 @@ const adminVillages = ref<any[]>([])
 const naturalVillages = ref<any[]>([])
 const filterAdminVillage = ref<number | null>(null)
 const filterNaturalVillage = ref<number | null>(null)
+const filterSearch = ref('')
 
 const list = ref<any[]>([])
 const total = ref(0)
@@ -93,6 +94,7 @@ const fetchList = async () => {
     const params: any = { skip, limit: pageSize.value }
     if (filterAdminVillage.value) params.admin_village_id = filterAdminVillage.value
     if (filterNaturalVillage.value) params.natural_village_id = filterNaturalVillage.value
+    if (filterSearch.value) params.search = filterSearch.value
 
     const [data, avs] = await Promise.all([
       householdApi.getAll(params) as Promise<any>,
@@ -143,6 +145,11 @@ watch(filterNaturalVillage, () => {
   fetchList()
   fetchStats()
 })
+
+const handleSearch = () => {
+  page.value = 1
+  fetchList()
+}
 
 const openAdd = () => {
   isEdit.value = false
@@ -229,6 +236,8 @@ onMounted(async () => {
       <el-select v-model="filterNaturalVillage" placeholder="按自然村筛选" clearable style="width: 200px">
         <el-option v-for="nv in (filterAdminVillage ? naturalVillages.filter((n: any) => n.admin_village_id === filterAdminVillage) : naturalVillages)" :key="nv.id" :label="nv.name" :value="nv.id" />
       </el-select>
+      <el-input v-model="filterSearch" placeholder="按姓名或身份证搜索" clearable style="width: 200px" @keyup.enter="handleSearch" />
+      <el-button type="primary" @click="handleSearch">搜索</el-button>
     </div>
 
     <el-table :data="list" v-loading="loading" stripe>

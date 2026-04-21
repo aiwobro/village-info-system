@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { assetApi } from '../api/asset'
 import { adminVillageApi } from '../api/adminVillage'
 import { naturalVillageApi } from '../api/naturalVillage'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ImportDialog from '../components/ImportDialog.vue'
+import BatchActionBar from '../components/BatchActionBar.vue'
+import ViewDialog from '../components/ViewDialog.vue'
+import EditDialog from '../components/EditDialog.vue'
+import DeleteConfirmModal from '../components/DeleteConfirmModal.vue'
+import { useSelectionStore } from '../stores/selection'
+import { useAuthStore } from '../stores/auth'
 
 const importDialogVisible = ref(false)
 const importFields = [
@@ -124,6 +130,104 @@ const handleDelete = async (id: number) => {
 }
 
 watch([page, pageSize], () => fetchList())
+
+const selection = useSelectionStore()
+const auth = useAuthStore()
+const MODULE = 'asset'
+
+const viewDialogVisible = ref(false)
+const viewRecord = ref<any>(null)
+const editDialogVisible = ref(false)
+const editRecord = ref<any>(null)
+const deleteDialogVisible = ref(false)
+
+const selectedCount = computed(() => selection.count(MODULE))
+const selectedIds = computed(() => selection.getSelectedIds(MODULE))
+const lockedCount = computed(() => list.value.filter(r => selectedIds.value.includes(r.id) && r.is_locked).length)
+
+const handleBatchView = () => {
+  if (selectedIds.value.length !== 1) { ElMessage.warning('请选择单条记录查看'); return }
+  viewRecord.value = list.value.find(r => r.id === selectedIds.value[0])
+  viewDialogVisible.value = true
+}
+const handleBatchEdit = () => {
+  if (selectedIds.value.length !== 1) { ElMessage.warning('请选择单条记录进行编辑'); return }
+  editRecord.value = list.value.find(r => r.id === selectedIds.value[0])
+  editDialogVisible.value = true
+}
+const handleBatchDelete = () => { deleteDialogVisible.value = true }
+const handleBatchLock = async () => {
+  try {
+    await ElMessageBox.confirm(`锁定选中的 ${selectedIds.value.length} 条？`, '确认锁定', { type: 'warning' })
+    await Promise.all(selectedIds.value.map(id => assetApi.lock(id)))
+    ElMessage.success('已锁定'); selection.clear(MODULE); fetchList()
+  } catch (e: any) { if (e !== 'cancel') ElMessage.error(e?.response?.data?.detail || '锁定失败') }
+}
+const handleBatchUnlock = async () => {
+  try {
+    await ElMessageBox.confirm(`解锁选中的 ${selectedIds.value.length} 条？`, '确认解锁', { type: 'info' })
+    await Promise.all(selectedIds.value.map(id => assetApi.unlock(id)))
+    ElMessage.success('已解锁'); selection.clear(MODULE); fetchList()
+  } catch (e: any) { if (e !== 'cancel') ElMessage.error(e?.response?.data?.detail || '解锁失败') }
+}
+const handleBatchExport = async () => {
+  const ids = selectedIds.value
+  if (!ids.length) return
+  try {
+    const res = await assetApi.export(ids, 'asset') as any
+    const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href = url; a.download = `asset_${Date.now()}.xlsx`; a.click()
+    URL.revokeObjectURL(url)
+    ElMessage.success(`导出 ${ids.length} 条`)
+  } catch (e: any) { ElMessage.error(e?.message || '导出失败') }
+}
+const handleDeleteConfirm = async () => {
+  try {
+    await Promise.all(selectedIds.value.map(id => assetApi.delete(id)))
+    ElMessage.success('已删除'); selection.clear(MODULE); deleteDialogVisible.value = false; fetchList()
+  } catch (e: any) { ElMessage.error(e?.response?.data?.detail || '删除失败') }
+}
+const handleSelectionChange = (rows: any[]) => {
+  const pageIds = list.value.map(r => r.id)
+  selection.deselectAll(MODULE, pageIds)
+  if (rows.length) selection.selectAll(MODULE, rows.map((r: any) => r.id))
+}
+
+const viewFields = [
+  { label: '资产名称', field: 'name' },
+  { label: '资产编码', field: 'code' },
+  { label: '资产类型', field: 'asset_type' },
+  { label: '位置', field: 'location' },
+  { label: '面积(m²)', field: 'area' },
+  { label: '数量', field: 'quantity' },
+  { label: '单位', field: 'unit' },
+  { label: '购置日期', field: 'purchase_date' },
+  { label: '购置价格', field: 'purchase_price' },
+  { label: '当前估值', field: 'current_value' },
+  { label: '状态', field: 'status' },
+  { label: '描述', field: 'description' },
+  { label: '备注', field: 'remark' },
+]
+
+const editFields = [
+  { label: '资产名称', field: 'name', type: 'input', required: true },
+  { label: '资产编码', field: 'code', type: 'input' },
+  { label: '资产类型', field: 'asset_type', type: 'select',
+    options: [{ label: '土地', value: '土地' }, { label: '建筑', value: '建筑' }, { label: '设备', value: '设备' }, { label: '设施', value: '设施' }] },
+  { label: '位置', field: 'location', type: 'input' },
+  { label: '面积(m²)', field: 'area', type: 'input' },
+  { label: '数量', field: 'quantity', type: 'input' },
+  { label: '单位', field: 'unit', type: 'input' },
+  { label: '购置日期', field: 'purchase_date', type: 'input' },
+  { label: '购置价格', field: 'purchase_price', type: 'input' },
+  { label: '当前估值', field: 'current_value', type: 'input' },
+  { label: '状态', field: 'status', type: 'select',
+    options: [{ label: '正常使用', value: '正常使用' }, { label: '报废', value: '报废' }, { label: '出租', value: '出租' }] },
+  { label: '描述', field: 'description', type: 'textarea' },
+  { label: '备注', field: 'remark', type: 'textarea' },
+]
+
 onMounted(fetchList)
 </script>
 
@@ -148,7 +252,8 @@ onMounted(fetchList)
       <el-button type="primary" @click="handleSearch">搜索</el-button>
     </div>
 
-    <el-table :data="list" v-loading="loading" stripe>
+    <el-table :data="list" v-loading="loading" stripe row-class-name="row-selected" @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="40" />
       <el-table-column prop="name" label="资产名称" />
       <el-table-column prop="code" label="编码" />
       <el-table-column prop="asset_type" label="类型" />
@@ -157,6 +262,9 @@ onMounted(fetchList)
       <el-table-column prop="quantity" label="数量" />
       <el-table-column prop="current_value" label="当前估值" />
       <el-table-column prop="status" label="状态" />
+      <el-table-column label="锁定" width="70">
+        <template #default="{ row }"><el-icon v-if="row.is_locked" style="color: var(--notion-orange)"><Lock /></el-icon></template>
+      </el-table-column>
       <el-table-column label="操作" width="180">
         <template #default="{ row }">
           <el-button size="small" @click="openEdit(row)">编辑</el-button>
@@ -259,6 +367,31 @@ onMounted(fetchList)
       :batch-api="assetApi.batchCreate"
       @success="fetchList"
     />
+
+    <BatchActionBar
+      :count="selectedCount"
+      :module="MODULE"
+      :locked-count="lockedCount"
+      @view="handleBatchView"
+      @edit="handleBatchEdit"
+      @delete="handleBatchDelete"
+      @lock="handleBatchLock"
+      @unlock="handleBatchUnlock"
+      @export="handleBatchExport"
+    />
+
+    <ViewDialog v-model="viewDialogVisible" title="查看资产" :record="viewRecord" :fields="viewFields" />
+
+    <EditDialog
+      v-model="editDialogVisible"
+      title="编辑资产"
+      :record="editRecord"
+      :fields="editFields"
+      :api="assetApi"
+      @success="() => { selection.clear(MODULE); fetchList() }"
+    />
+
+    <DeleteConfirmModal v-model="deleteDialogVisible" :count="selectedCount" @confirm="handleDeleteConfirm" />
   </div>
 </template>
 

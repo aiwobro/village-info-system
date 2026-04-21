@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: village_postgres
+    environment:
+      POSTGRES_USER: villageadmin
+      POSTGRES_PASSWORD: village2024
+      POSTGRES_DB: village_info
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - village-net
+
+  backend:
+    image: ghcr.io/aiwobro/village-info-system/backend:latest
+    container_name: village_backend
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      - SECRET_KEY=${BACKEND_SECRET_KEY}
+      - PROJECT_NAME=VillageInfoSystem
+      - API_V1_STR=/api/v1
+    ports:
+      - "127.0.0.1:8000:8000"
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - village-net
+    volumes:
+      - ./uploads:/app/uploads
+
+  # 已移除 nginx 容器，改为由宿主 nginx 直接代理 backend
+
+networks:
+  village-net:
+    driver: bridge
+
+volumes:
+  postgres_data:

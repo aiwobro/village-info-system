@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import { householdApi } from '../api/household'
 import { naturalVillageApi } from '../api/naturalVillage'
 import { adminVillageApi } from '../api/adminVillage'
 import { villagerApi } from '../api/villager'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ImportDialog from '../components/ImportDialog.vue'
+import BatchActionBar from '../components/BatchActionBar.vue'
+import ViewDialog from '../components/ViewDialog.vue'
+import EditDialog from '../components/EditDialog.vue'
+import DeleteConfirmModal from '../components/DeleteConfirmModal.vue'
+import { useSelectionStore } from '../stores/selection'
+import { useAuthStore } from '../stores/auth'
 
 const importDialogVisible = ref(false)
 const importFields = [
@@ -44,6 +50,127 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
+const selection = useSelectionStore()
+const auth = useAuthStore()
+const MODULE = 'household'
+
+// Batch action bar state
+const viewDialogVisible = ref(false)
+const viewRecord = ref<any>(null)
+const editDialogVisible = ref(false)
+const editRecord = ref<any>(null)
+const deleteDialogVisible = ref(false)
+
+const selectedCount = computed(() => selection.count(MODULE))
+const selectedIds = computed(() => selection.getSelectedIds(MODULE))
+const lockedCount = computed(() =>
+  list.value.filter(r => selectedIds.value.includes(r.id) && r.is_locked).length
+)
+
+// Batch action handlers
+const handleBatchView = () => {
+  const ids = selectedIds.value
+  if (ids.length !== 1) {
+    ElMessage.warning('请选择单条记录查看')
+    return
+  }
+  viewRecord.value = list.value.find(r => r.id === ids[0])
+  viewDialogVisible.value = true
+}
+
+const handleBatchEdit = () => {
+  const ids = selectedIds.value
+  if (ids.length !== 1) {
+    ElMessage.warning('请选择单条记录进行编辑')
+    return
+  }
+  editRecord.value = list.value.find(r => r.id === ids[0])
+  editDialogVisible.value = true
+}
+
+const handleBatchDelete = () => {
+  deleteDialogVisible.value = true
+}
+
+const handleBatchLock = async () => {
+  const ids = selectedIds.value
+  if (!ids.length) return
+  try {
+    await ElMessageBox.confirm(`锁定选中的 ${ids.length} 条记录？锁定后无法编辑和删除。`, '确认锁定', { type: 'warning' })
+    await Promise.all(ids.map(id => householdApi.lock(id)))
+    ElMessage.success(`已锁定 ${ids.length} 条记录`)
+    selection.clear(MODULE)
+    fetchList()
+  } catch (e: any) {
+    if (e !== 'cancel') ElMessage.error(e?.response?.data?.detail || '锁定失败')
+  }
+}
+
+const handleBatchUnlock = async () => {
+  const ids = selectedIds.value
+  if (!ids.length) return
+  try {
+    await ElMessageBox.confirm(`解锁选中的 ${ids.length} 条记录？`, '确认解锁', { type: 'info' })
+    await Promise.all(ids.map(id => householdApi.unlock(id)))
+    ElMessage.success(`已解锁 ${ids.length} 条记录`)
+    selection.clear(MODULE)
+    fetchList()
+  } catch (e: any) {
+    if (e !== 'cancel') ElMessage.error(e?.response?.data?.detail || '解锁失败')
+  }
+}
+
+const handleBatchExport = async () => {
+  const ids = selectedIds.value
+  if (!ids.length) return
+  try {
+    const res = await householdApi.export(ids, 'household') as any
+    const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href = url; a.download = `household_${Date.now()}.xlsx`; a.click()
+    URL.revokeObjectURL(url)
+    ElMessage.success(`导出 ${ids.length} 条`)
+  } catch (e: any) { ElMessage.error(e?.message || '导出失败') }
+}
+
+const handleDeleteConfirm = async () => {
+  const ids = selectedIds.value
+  try {
+    await Promise.all(ids.map(id => householdApi.delete(id)))
+    ElMessage.success(`已删除 ${ids.length} 条记录`)
+    selection.clear(MODULE)
+    deleteDialogVisible.value = false
+    fetchList()
+  } catch (e: any) {
+    ElMessage.error(e?.response?.data?.detail || '删除失败')
+  }
+}
+
+// Table row selection
+const handleSelectionChange = (rows: any[]) => {
+  const pageIds = list.value.map(r => r.id)
+  selection.deselectAll(MODULE, pageIds)
+  if (rows.length) {
+    selection.selectAll(MODULE, rows.map((r: any) => r.id))
+  }
+}
+
+// View/Edit dialog fields
+const viewFields = [
+  { label: '户号', field: 'household_no' },
+  { label: '户主姓名', field: 'head_name' },
+  { label: '户内人数', field: 'member_count' },
+  { label: '行政村', field: 'admin_village_name' },
+  { label: '自然村', field: 'natural_village_name' },
+  { label: '地址', field: 'address' },
+]
+
+const editFields = computed(() => [
+  { label: '户号', field: 'household_no', type: 'input', required: true },
+  { label: '所属自然村', field: 'natural_village_id', type: 'select', required: true,
+    options: naturalVillages.value.map((n: any) => ({ label: n.name, value: n.id })) },
+  { label: '地址', field: 'address', type: 'input' },
+])
 
 // 成员弹窗
 const membersDialogVisible = ref(false)
@@ -274,13 +401,25 @@ onMounted(async () => {
       <el-button type="primary" @click="handleSearch">搜索</el-button>
     </div>
 
-    <el-table :data="list" v-loading="loading" stripe>
+    <el-table
+      :data="list"
+      v-loading="loading"
+      stripe
+      row-class-name="row-selected"
+      @selection-change="handleSelectionChange"
+    >
+      <el-table-column type="selection" width="40" />
       <el-table-column prop="household_no" label="户号" />
       <el-table-column prop="head_name" label="户主姓名" />
       <el-table-column prop="member_count" label="户内人数" width="90" />
       <el-table-column prop="admin_village_name" label="行政村" />
       <el-table-column prop="natural_village_name" label="自然村" />
       <el-table-column prop="address" label="地址" />
+      <el-table-column label="锁定" width="70">
+        <template #default="{ row }">
+          <el-icon v-if="row.is_locked" style="color: var(--notion-orange)"><Lock /></el-icon>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="240">
         <template #default="{ row }">
           <el-button size="small" @click="openMembers(row)">成员</el-button>
@@ -368,6 +507,44 @@ onMounted(async () => {
       :batch-api="householdApi.batchCreate"
       :transform="importTransform"
       @success="fetchList"
+    />
+
+    <!-- 批量操作栏 -->
+    <BatchActionBar
+      :count="selectedCount"
+      :module="MODULE"
+      :locked-count="lockedCount"
+      @view="handleBatchView"
+      @edit="handleBatchEdit"
+      @delete="handleBatchDelete"
+      @lock="handleBatchLock"
+      @unlock="handleBatchUnlock"
+      @export="handleBatchExport"
+    />
+
+    <!-- 查看弹窗 -->
+    <ViewDialog
+      v-model="viewDialogVisible"
+      :title="`查看户 — ${viewRecord?.household_no ?? ''}`"
+      :record="viewRecord"
+      :fields="viewFields"
+    />
+
+    <!-- 编辑弹窗 -->
+    <EditDialog
+      v-model="editDialogVisible"
+      :title="editRecord?.id ? '编辑户' : '新增户'"
+      :record="editRecord"
+      :fields="editFields"
+      :api="householdApi"
+      @success="() => { fetchList(); selection.clear(MODULE); }"
+    />
+
+    <!-- 删除确认弹窗 -->
+    <DeleteConfirmModal
+      v-model="deleteDialogVisible"
+      :count="selectedCount"
+      @confirm="handleDeleteConfirm"
     />
   </div>
 </template>

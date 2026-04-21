@@ -10,4 +10,8 @@ export const householdApi = {
   batchCreate: (items: any[]) => request.post('/households/batch', { items }) as Promise<any>,
   update: (id: number, data: any) => request.put(`/households/${id}`, data) as Promise<any>,
   delete: (id: number) => request.delete(`/households/${id}`) as Promise<any>,
+  lock: (id: number) => request.post(`/households/${id}/lock`) as Promise<any>,
+  unlock: (id: number) => request.post(`/households/${id}/unlock`) as Promise<any>,
+  export: (ids: number[], module: string) =>
+    request.post('/export', { ids, module }, { responseType: 'blob' }) as Promise<any>,
 }

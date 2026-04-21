@@ -8,4 +8,8 @@ export const assetApi = {
   update: (id: number, data: any) => request.put(`/assets/${id}`, data) as Promise<any>,
   batchCreate: (items: any[]) => request.post("/assets/batch", { items }) as Promise<any>,
   delete: (id: number) => request.delete(`/assets/${id}`) as Promise<any>,
+  lock: (id: number) => request.post(`/assets/${id}/lock`) as Promise<any>,
+  unlock: (id: number) => request.post(`/assets/${id}/unlock`) as Promise<any>,
+  export: (ids: number[], module: string) =>
+    request.post('/export', { ids, module }, { responseType: 'blob' }) as Promise<any>,
 }

@@ -40,6 +40,8 @@ def update(db: Session, id: int, obj: BankAccountUpdate):
     db_obj = get_by_id(db, id)
     if not db_obj:
         return None
+    if db_obj.is_locked:
+        raise ValueError("Cannot update a locked bank account")
     for key, value in obj.model_dump(exclude_unset=True).items():
         setattr(db_obj, key, value)
     db.commit()
@@ -51,9 +53,33 @@ def delete(db: Session, id: int):
     db_obj = get_by_id(db, id)
     if not db_obj:
         return False
+    if db_obj.is_locked:
+        raise ValueError("Cannot delete a locked bank account")
     db.delete(db_obj)
     db.commit()
     return True
+
+
+def lock(db: Session, id: int):
+    """锁定银行账号，禁止更新和删除"""
+    db_obj = get_by_id(db, id)
+    if not db_obj:
+        return None
+    db_obj.is_locked = 1
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+
+def unlock(db: Session, id: int):
+    """解锁银行账号，允许更新和删除"""
+    db_obj = get_by_id(db, id)
+    if not db_obj:
+        return None
+    db_obj.is_locked = 0
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
 
 
 def batch_create(db: Session, items: list):

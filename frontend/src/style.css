@@ -1,296 +1,677 @@
+/* ============================================================
+   Notion Design System — Global Styles
+   Based on Notion's warm neutral palette + clean typography
+   ============================================================ */
+
+/* --- Inter Font (CDN loaded in index.html or main.ts) --- */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ============================================================
+   CSS Custom Properties — Notion Color Palette
+   ============================================================ */
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* Primary */
+  --notion-black: rgba(0, 0, 0, 0.95);
+  --notion-white: #ffffff;
+  --notion-blue: #0075de;
+  --notion-blue-active: #005bab;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  /* Warm Neutral Scale */
+  --notion-warm-white: #f6f5f4;
+  --notion-warm-dark: #31302e;
+  --notion-gray-500: #615d59;
+  --notion-gray-300: #a39e98;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* Semantic */
+  --notion-teal: #2a9d99;
+  --notion-green: #1aae39;
+  --notion-orange: #dd5b00;
+  --notion-pink: #ff64c8;
+  --notion-purple: #391c57;
+  --notion-brown: #523410;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+  /* Interactive */
+  --notion-link: #0075de;
+  --notion-link-light: #62aef0;
+  --notion-focus: #097fe8;
+  --notion-badge-bg: #f2f9ff;
+  --notion-badge-text: #097fe8;
+
+  /* Borders & Shadows — Notion's "whisper weight" */
+  --notion-border: 1px solid rgba(0, 0, 0, 0.1);
+  --notion-border-strong: 1px solid rgba(0, 0, 0, 0.2);
+
+  /* Notion shadow: 4-layer stack, max opacity 0.04 */
+  --notion-shadow-card:
+    0 4px 18px rgba(0, 0, 0, 0.04),
+    0 2.025px 7.847px rgba(0, 0, 0, 0.027),
+    0 0.8px 2.925px rgba(0, 0, 0, 0.02),
+    0 0.175px 1.04px rgba(0, 0, 0, 0.01);
+
+  /* Notion deep shadow: 5-layer for modals */
+  --notion-shadow-deep:
+    0 1px 3px rgba(0, 0, 0, 0.01),
+    0 3px 7px rgba(0, 0, 0, 0.02),
+    0 7px 15px rgba(0, 0, 0, 0.02),
+    0 14px 28px rgba(0, 0, 0, 0.04),
+    0 23px 52px rgba(0, 0, 0, 0.05);
+
+  /* Typography */
+  --notion-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --notion-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* Spacing base: 8px */
+  --notion-space-1: 4px;
+  --notion-space-2: 8px;
+  --notion-space-3: 12px;
+  --notion-space-4: 16px;
+  --notion-space-5: 24px;
+  --notion-space-6: 32px;
+  --notion-space-7: 48px;
+  --notion-space-8: 64px;
+
+  /* Border Radius */
+  --notion-radius-sm: 4px;      /* buttons, inputs */
+  --notion-radius-md: 8px;      /* small cards */
+  --notion-radius-lg: 12px;     /* standard cards */
+  --notion-radius-xl: 16px;      /* featured cards */
+  --notion-radius-pill: 9999px;  /* badges */
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
-}
-
-body {
+/* ============================================================
+   Base Reset & Typography
+   ============================================================ */
+* {
   margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
-  }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
-}
-
-.counter {
-  font-size: 16px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  color: var(--accent);
-  background: var(--accent-bg);
-  border: 2px solid transparent;
-  transition: border-color 0.3s;
-  margin-bottom: 24px;
-
-  &:hover {
-    border-color: var(--accent-border);
-  }
-  &:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-}
-
-.hero {
-  position: relative;
-
-  .base,
-  .framework,
-  .vite {
-    inset-inline: 0;
-    margin: 0 auto;
-  }
-
-  .base {
-    width: 170px;
-    position: relative;
-    z-index: 0;
-  }
-
-  .framework,
-  .vite {
-    position: absolute;
-  }
-
-  .framework {
-    z-index: 1;
-    top: 34px;
-    height: 28px;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
-      scale(1.4);
-  }
-
-  .vite {
-    z-index: 0;
-    top: 107px;
-    height: 26px;
-    width: auto;
-    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
-      scale(0.8);
-  }
-}
-
-#app {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
+  padding: 0;
   box-sizing: border-box;
 }
 
-#center {
-  display: flex;
-  flex-direction: column;
-  gap: 25px;
-  place-content: center;
-  place-items: center;
-  flex-grow: 1;
-
-  @media (max-width: 1024px) {
-    padding: 32px 20px 24px;
-    gap: 18px;
-  }
+html, body {
+  height: 100%;
+  font-family: var(--notion-font);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--notion-black);
+  background: var(--notion-white);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  color-scheme: light;
 }
 
-#next-steps {
-  display: flex;
-  border-top: 1px solid var(--border);
-  text-align: left;
-
-  & > div {
-    flex: 1 1 0;
-    padding: 32px;
-    @media (max-width: 1024px) {
-      padding: 24px 20px;
-    }
-  }
-
-  .icon {
-    margin-bottom: 16px;
-    width: 22px;
-    height: 22px;
-  }
-
-  @media (max-width: 1024px) {
-    flex-direction: column;
-    text-align: center;
-  }
+#app {
+  height: 100%;
 }
 
-#docs {
-  border-right: 1px solid var(--border);
-
-  @media (max-width: 1024px) {
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--notion-font);
+  color: var(--notion-black);
+  font-weight: 600;
+  line-height: 1.3;
 }
 
-#next-steps ul {
-  list-style: none;
-  padding: 0;
+h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+}
+
+h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+a {
+  color: var(--notion-link);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* ============================================================
+   Element Plus Global Overrides
+   ============================================================ */
+
+/* Primary color — Notion Blue */
+:root {
+  --el-color-primary: #0075de;
+  --el-color-primary-light-3: #4da6e8;
+  --el-color-primary-light-5: #80baed;
+  --el-color-primary-light-7: #b3d4f3;
+  --el-color-primary-light-9: #e6f1fb;
+  --el-color-primary-dark-2: #005bab;
+  --el-color-primary-bg: #f2f9ff;
+
+  /* Border */
+  --el-border-color: rgba(0, 0, 0, 0.1);
+  --el-border-color-light: rgba(0, 0, 0, 0.07);
+  --el-border-color-lighter: rgba(0, 0, 0, 0.05);
+  --el-border-radius-base: 4px;
+  --el-border-radius-small: 3px;
+  --el-border-radius-round: 4px;
+
+  /* Text */
+  --el-text-color-primary: rgba(0, 0, 0, 0.95);
+  --el-text-color-regular: rgba(0, 0, 0, 0.85);
+  --el-text-color-secondary: #615d59;
+  --el-text-color-placeholder: #a39e98;
+  --el-text-color-disabled: #a39e98;
+
+  /* Background */
+  --el-bg-color: #ffffff;
+  --el-bg-color-page: #f6f5f4;
+  --el-bg-color-overlay: #ffffff;
+
+  /* Box shadow */
+  --el-box-shadow-light: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 8px rgba(0, 0, 0, 0.03);
+  --el-box-shadow-lighter: 0 0 0 1px rgba(0, 0, 0, 0.05);
+  --el-box-shadow-base: var(--notion-shadow-card);
+
+  /* Font */
+  --el-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* ============================================================
+   Element Plus Component Overrides
+   ============================================================ */
+
+/* --- Buttons --- */
+.el-button {
+  border-radius: var(--notion-radius-sm);
+  font-family: var(--notion-font);
+  font-weight: 500;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.el-button:hover {
+  transform: scale(1.02);
+}
+
+.el-button:active {
+  transform: scale(0.97);
+}
+
+.el-button--primary {
+  background: var(--notion-blue);
+  border-color: var(--notion-blue);
+}
+
+.el-button--primary:hover {
+  background: var(--notion-blue-active);
+  border-color: var(--notion-blue-active);
+}
+
+.el-button--default {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: transparent;
+  color: var(--notion-black);
+}
+
+.el-button--default:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: var(--notion-black);
+}
+
+.el-button--text {
+  color: var(--notion-black);
+}
+
+.el-button--text:hover {
+  color: var(--notion-blue);
+  background: transparent;
+  border-color: transparent;
+}
+
+/* --- Inputs --- */
+.el-input__wrapper {
+  border-radius: var(--notion-radius-sm);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1) !important;
+  background: var(--notion-white);
+}
+
+.el-input__wrapper:hover {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2) !important;
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: 0 0 0 2px var(--notion-focus) !important;
+}
+
+.el-input__inner {
+  font-family: var(--notion-font);
+  color: var(--notion-black);
+}
+
+.el-input__inner::placeholder {
+  color: var(--notion-gray-300);
+}
+
+/* --- Select --- */
+.el-select__wrapper {
+  border-radius: var(--notion-radius-sm);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1) !important;
+  background: var(--notion-white);
+}
+
+.el-select__wrapper:hover {
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2) !important;
+}
+
+.el-select__wrapper.is-focused {
+  box-shadow: 0 0 0 2px var(--notion-focus) !important;
+}
+
+/* --- Form labels --- */
+.el-form-item__label {
+  font-family: var(--notion-font);
+  font-weight: 500;
+  color: var(--notion-warm-dark);
+}
+
+/* --- Cards --- */
+.el-card {
+  border-radius: var(--notion-radius-lg);
+  border: var(--notion-border);
+  box-shadow: var(--notion-shadow-card);
+  background: var(--notion-white);
+}
+
+.el-card:hover {
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.06),
+    0 2.5px 9px rgba(0, 0, 0, 0.04),
+    0 1px 4px rgba(0, 0, 0, 0.025),
+    0 0.25px 1.5px rgba(0, 0, 0, 0.012);
+}
+
+/* --- Tables --- */
+.el-table {
+  --el-table-border-color: rgba(0, 0, 0, 0.07);
+  --el-table-header-bg-color: var(--notion-warm-white);
+  --el-table-header-text-color: var(--notion-gray-500);
+  --el-table-row-hover-bg-color: rgba(246, 245, 244, 0.8);
+  --el-table-bg-color: var(--notion-white);
+  --el-table-tr-bg-color: var(--notion-white);
+  --el-table-fixed-box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+  font-family: var(--notion-font);
+  border-radius: var(--notion-radius-lg);
+  overflow: hidden;
+}
+
+.el-table th.el-table__cell {
+  background: var(--notion-warm-white);
+  font-weight: 600;
+  font-size: 13px;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  color: var(--notion-gray-500);
+}
+
+.el-table td.el-table__cell {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  color: var(--notion-black);
+}
+
+.el-table__body tr:hover > td.el-table__cell {
+  background: rgba(246, 245, 244, 0.6) !important;
+}
+
+/* --- Dialog / Modal --- */
+.el-dialog {
+  border-radius: var(--notion-radius-xl);
+  border: var(--notion-border);
+  box-shadow: var(--notion-shadow-deep);
+}
+
+.el-dialog__header {
+  border-bottom: var(--notion-border);
+  padding: var(--notion-space-4) var(--notion-space-5);
+}
+
+.el-dialog__title {
+  font-family: var(--notion-font);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--notion-black);
+}
+
+.el-dialog__body {
+  padding: var(--notion-space-5);
+}
+
+.el-dialog__footer {
+  border-top: var(--notion-border);
+  padding: var(--notion-space-4) var(--notion-space-5);
+}
+
+/* --- Pagination --- */
+.el-pagination {
+  --el-pagination-bg-color: transparent;
+  --el-pagination-button-bg-color: rgba(0, 0, 0, 0.05);
+  --el-pagination-hover-color: var(--notion-blue);
+  font-family: var(--notion-font);
+}
+
+.el-pagination button,
+.el-pager li {
+  border-radius: var(--notion-radius-sm);
+}
+
+.el-pager li.is-active {
+  background: var(--notion-blue);
+  color: white;
+}
+
+/* --- Message / Notification --- */
+.el-message {
+  border-radius: var(--notion-radius-md);
+  border: var(--notion-border);
+  box-shadow: var(--notion-shadow-card);
+}
+
+/* --- Dropdown --- */
+.el-dropdown-menu {
+  border-radius: var(--notion-radius-md);
+  border: var(--notion-border);
+  box-shadow: var(--notion-shadow-deep);
+}
+
+.el-dropdown-menu__item {
+  font-family: var(--notion-font);
+  border-radius: var(--notion-radius-sm);
+}
+
+.el-dropdown-menu__item:hover {
+  background: var(--notion-warm-white);
+  color: var(--notion-black);
+}
+
+/* --- Tabs --- */
+.el-tabs__item {
+  font-family: var(--notion-font);
+  font-weight: 500;
+  color: var(--notion-gray-500);
+}
+
+.el-tabs__item.is-active {
+  color: var(--notion-black);
+  font-weight: 600;
+}
+
+.el-tabs__active-bar {
+  background-color: var(--notion-black);
+}
+
+/* --- Tag / Badge --- */
+.el-tag {
+  border-radius: var(--notion-radius-pill);
+  font-family: var(--notion-font);
+  font-weight: 500;
+  font-size: 12px;
+  border: none;
+}
+
+/* --- Tooltip --- */
+.el-popper.is-dark {
+  border-radius: var(--notion-radius-sm);
+  box-shadow: var(--notion-shadow-card);
+}
+
+/* --- Popover --- */
+.el-popover.el-popper {
+  border-radius: var(--notion-radius-lg);
+  border: var(--notion-border);
+  box-shadow: var(--notion-shadow-deep);
+  font-family: var(--notion-font);
+}
+
+/* --- Loading --- */
+.el-loading-mask {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+/* --- Empty --- */
+.el-empty__description {
+  color: var(--notion-gray-500);
+  font-family: var(--notion-font);
+}
+
+/* ============================================================
+   Utility Classes — Notion Style Helpers
+   ============================================================ */
+
+/* Notion card */
+.notion-card {
+  background: var(--notion-white);
+  border: var(--notion-border);
+  border-radius: var(--notion-radius-lg);
+  box-shadow: var(--notion-shadow-card);
+}
+
+/* Notion page header */
+.notion-header {
+  margin-bottom: var(--notion-space-5);
+}
+
+.notion-header h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--notion-black);
+}
+
+/* Notion section divider */
+.notion-divider {
+  height: 1px;
+  background: rgba(0, 0, 0, 0.07);
+  margin: var(--notion-space-5) 0;
+}
+
+/* Notion badge */
+.notion-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: var(--notion-badge-bg);
+  color: var(--notion-badge-text);
+  border-radius: var(--notion-radius-pill);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+}
+
+/* Notion section background (warm white) */
+.notion-section-alt {
+  background: var(--notion-warm-white);
+}
+
+/* Page content padding */
+
+/* ============================================================
+   Batch Selection Styles
+   ============================================================ */
+
+/* Selected row — light blue background matching Notion blue tint */
+.el-table__body tr.row-selected > td.el-table__cell {
+  background: var(--el-color-primary-light-9) !important;
+}
+
+.el-table__body tr.row-selected:hover > td.el-table__cell {
+  background: var(--el-color-primary-light-9) !important;
+}
+
+/* Lock icon color */
+.row-locked .el-icon {
+  color: var(--notion-orange);
+}
+
+.row-unlocked .el-icon {
+  color: var(--notion-gray-300);
+}
+
+/* Batch action bar — floating bottom bar */
+.batch-action-bar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
   display: flex;
+  align-items: center;
   gap: 8px;
-  margin: 32px 0 0;
-
-  .logo {
-    height: 18px;
-  }
-
-  a {
-    color: var(--text-h);
-    font-size: 16px;
-    border-radius: 6px;
-    background: var(--social-bg);
-    display: flex;
-    padding: 6px 12px;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-    transition: box-shadow 0.3s;
-
-    &:hover {
-      box-shadow: var(--shadow);
-    }
-    .button-icon {
-      height: 18px;
-      width: 18px;
-    }
-  }
-
-  @media (max-width: 1024px) {
-    margin-top: 20px;
-    flex-wrap: wrap;
-    justify-content: center;
-
-    li {
-      flex: 1 1 calc(50% - 8px);
-    }
-
-    a {
-      width: 100%;
-      justify-content: center;
-      box-sizing: border-box;
-    }
-  }
+  padding: 10px 16px;
+  background: var(--notion-warm-dark);
+  border-radius: var(--notion-radius-lg);
+  box-shadow: var(--notion-shadow-deep);
+  color: white;
+  font-family: var(--notion-font);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
-#spacer {
-  height: 88px;
-  border-top: 1px solid var(--border);
-  @media (max-width: 1024px) {
-    height: 48px;
-  }
+.batch-action-bar__count {
+  background: var(--notion-blue);
+  color: white;
+  border-radius: var(--notion-radius-pill);
+  padding: 2px 10px;
+  font-size: 13px;
+  font-weight: 600;
 }
 
-.ticks {
-  position: relative;
-  width: 100%;
+.batch-action-bar .el-button {
+  color: white;
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  font-family: var(--notion-font);
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: var(--notion-radius-sm);
+  padding: 6px 12px;
+  height: auto;
+}
 
-  &::before,
-  &::after {
-    content: '';
-    position: absolute;
-    top: -4.5px;
-    border: 5px solid transparent;
-  }
+.batch-action-bar .el-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.02);
+  color: white;
+}
 
-  &::before {
-    left: 0;
-    border-left-color: var(--border);
-  }
-  &::after {
-    right: 0;
-    border-right-color: var(--border);
-  }
+.batch-action-bar .el-button--primary {
+  background: var(--notion-blue);
+  color: white;
+}
+
+.batch-action-bar .el-button--danger {
+  background: #dc2626;
+  color: white;
+}
+
+.batch-action-bar .el-button--danger:hover {
+  background: #b91c1c;
+}
+.page-content {
+  padding: var(--notion-space-5);
+  max-width: 1200px;
+}
+
+/* Whitespace rhythm */
+.page-section {
+  padding: var(--notion-space-7) 0;
+}
+
+/* ============================================================
+   Shared Page Layout (used by all view pages)
+   ============================================================ */
+
+/* Page wrapper — all views use class="page" */
+.page {
+  padding: 0;
+  max-width: 1200px;
+}
+
+/* Toolbar / Page header */
+.page .toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 16px;
+}
+
+.page .toolbar h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.95);
+  letter-spacing: -0.015em;
+}
+
+/* Filter bar */
+.page .filter-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.page .filter-bar .el-input,
+.page .filter-bar .el-select {
+  --el-input-bg-color: #ffffff;
+}
+
+/* Notion-style table container */
+.page .el-table {
+  border-radius: 10px;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  overflow: hidden;
+}
+
+/* Pagination */
+.page .el-pagination {
+  margin-top: 20px;
+  justify-content: flex-end;
+}
+
+/* el-divider in forms */
+.page .el-divider {
+  border-color: rgba(0, 0, 0, 0.07);
+  margin: 20px 0 16px;
+}
+
+.page .el-divider__text {
+  font-weight: 600;
+  font-size: 13px;
+  color: #615d59;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  background: transparent;
+}
+
+/* Dialog form rows */
+.page .el-row {
+  margin-bottom: 0;
+}
+
+.page .el-col {
+  padding-bottom: 4px;
+}
+
+/* Small table inside dialogs (contacts, banks) */
+.page .el-table--small {
+  border-radius: 6px;
+  font-size: 13px;
 }

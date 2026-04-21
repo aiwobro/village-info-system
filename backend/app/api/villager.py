@@ -4,7 +4,7 @@ from app.core.database import get_db
 from app.schemas.villager import VillagerCreate, VillagerBatchCreate, VillagerUpdate, VillagerOut
 from app.crud import villager as crud
 from app.models.user import User
-from app.api.auth import get_current_user
+from app.api.auth import get_current_user, require_admin
 
 router = APIRouter(prefix="/villagers", tags=["村民管理"])
 
@@ -36,6 +36,8 @@ def create_api(obj: VillagerCreate, db: Session = Depends(get_db), current_user:
 @router.put("/{id}", response_model=VillagerOut)
 def update_api(id: int, obj: VillagerUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = crud.update(db, id, obj)
+    if result == "LOCKED":
+        raise HTTPException(status_code=403, detail="该记录已锁定，无法编辑")
     if not result:
         raise HTTPException(status_code=404, detail="未找到")
     return result
@@ -43,6 +45,29 @@ def update_api(id: int, obj: VillagerUpdate, db: Session = Depends(get_db), curr
 
 @router.delete("/{id}")
 def delete_api(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    if not crud.delete(db, id):
+    result = crud.delete(db, id)
+    if result == "LOCKED":
+        raise HTTPException(status_code=403, detail="该记录已锁定，无法删除")
+    if not result:
         raise HTTPException(status_code=404, detail="未找到")
     return {"message": "删除成功"}
+
+
+@router.post("/{id}/lock")
+def lock_api(id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
+    result = crud.lock(db, id)
+    if not result:
+        raise HTTPException(status_code=404, detail="未找到")
+    if result == "LOCKED":
+        return {"message": "该记录已是锁定状态"}
+    return {"message": "锁定成功"}
+
+
+@router.post("/{id}/unlock")
+def unlock_api(id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
+    result = crud.unlock(db, id)
+    if not result:
+        raise HTTPException(status_code=404, detail="未找到")
+    if result == "NOT_LOCKED":
+        return {"message": "该记录已是解锁状态"}
+    return {"message": "解锁成功"}

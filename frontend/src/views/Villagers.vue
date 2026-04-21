@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { villagerApi } from '../api/villager'
 import { householdApi } from '../api/household'
 import { naturalVillageApi } from '../api/naturalVillage'
@@ -8,6 +8,12 @@ import { contactApi } from '../api/contact'
 import { bankAccountApi } from '../api/bankAccount'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ImportDialog from '../components/ImportDialog.vue'
+import BatchActionBar from '../components/BatchActionBar.vue'
+import ViewDialog from '../components/ViewDialog.vue'
+import EditDialog from '../components/EditDialog.vue'
+import DeleteConfirmModal from '../components/DeleteConfirmModal.vue'
+import { useSelectionStore } from '../stores/selection'
+import { useAuthStore } from '../stores/auth'
 
 const importDialogVisible = ref(false)
 const importFields = [
@@ -56,6 +62,121 @@ const loading = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
+const selection = useSelectionStore()
+const auth = useAuthStore()
+const MODULE = 'villager'
+
+// Batch action bar state
+const viewDialogVisible = ref(false)
+const viewRecord = ref<any>(null)
+const editDialogVisible = ref(false)
+const editRecord = ref<any>(null)
+const deleteDialogVisible = ref(false)
+
+const selectedCount = computed(() => selection.count(MODULE))
+const selectedIds = computed(() => selection.getSelectedIds(MODULE))
+const lockedCount = computed(() =>
+  list.value.filter(r => selectedIds.value.includes(r.id) && r.is_locked).length
+)
+
+const handleBatchView = () => {
+  const ids = selectedIds.value
+  if (ids.length !== 1) { ElMessage.warning('请选择单条记录查看'); return }
+  viewRecord.value = list.value.find(r => r.id === ids[0])
+  viewDialogVisible.value = true
+}
+
+const handleBatchEdit = () => {
+  const ids = selectedIds.value
+  if (ids.length !== 1) { ElMessage.warning('请选择单条记录进行编辑'); return }
+  editRecord.value = list.value.find(r => r.id === ids[0])
+  editDialogVisible.value = true
+}
+
+const handleBatchDelete = () => { deleteDialogVisible.value = true }
+
+const handleBatchLock = async () => {
+  const ids = selectedIds.value
+  if (!ids.length) return
+  try {
+    await ElMessageBox.confirm(`锁定选中的 ${ids.length} 条记录？`, '确认锁定', { type: 'warning' })
+    await Promise.all(ids.map(id => villagerApi.lock(id)))
+    ElMessage.success(`已锁定 ${ids.length} 条`)
+    selection.clear(MODULE); fetchList()
+  } catch (e: any) { if (e !== 'cancel') ElMessage.error(e?.response?.data?.detail || '锁定失败') }
+}
+
+const handleBatchUnlock = async () => {
+  const ids = selectedIds.value
+  if (!ids.length) return
+  try {
+    await ElMessageBox.confirm(`解锁选中的 ${ids.length} 条记录？`, '确认解锁', { type: 'info' })
+    await Promise.all(ids.map(id => villagerApi.unlock(id)))
+    ElMessage.success(`已解锁 ${ids.length} 条`)
+    selection.clear(MODULE); fetchList()
+  } catch (e: any) { if (e !== 'cancel') ElMessage.error(e?.response?.data?.detail || '解锁失败') }
+}
+
+const handleBatchExport = async () => {
+  const ids = selectedIds.value
+  if (!ids.length) return
+  try {
+    const res = await villagerApi.export(ids, 'villager') as any
+    const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href = url; a.download = `villager_${Date.now()}.xlsx`; a.click()
+    URL.revokeObjectURL(url)
+    ElMessage.success(`导出 ${ids.length} 条`)
+  } catch (e: any) { ElMessage.error(e?.message || '导出失败') }
+}
+
+const handleDeleteConfirm = async () => {
+  try {
+    await Promise.all(selectedIds.value.map(id => villagerApi.delete(id)))
+    ElMessage.success(`已删除 ${selectedIds.value.length} 条`)
+    selection.clear(MODULE); deleteDialogVisible.value = false; fetchList()
+  } catch (e: any) { ElMessage.error(e?.response?.data?.detail || '删除失败') }
+}
+
+const handleSelectionChange = (rows: any[]) => {
+  const pageIds = list.value.map(r => r.id)
+  selection.deselectAll(MODULE, pageIds)
+  if (rows.length) selection.selectAll(MODULE, rows.map((r: any) => r.id))
+}
+
+const viewFields = [
+  { label: '姓名', field: 'name' },
+  { label: '性别', field: 'gender' },
+  { label: '身份证号', field: 'id_card' },
+  { label: '出生日期', field: 'birth_date' },
+  { label: '民族', field: 'ethnicity' },
+  { label: '文化程度', field: 'education' },
+  { label: '职业', field: 'occupation' },
+  { label: '户号', field: 'household_no' },
+  { label: '与户主关系', field: 'relation_to_head' },
+  { label: '行政村', field: 'admin_village_name' },
+  { label: '自然村', field: 'natural_village_name' },
+  { label: '电话', field: 'phones' },
+  { label: '银行账号', field: 'bank_info' },
+  { label: '住址', field: 'address' },
+  { label: '备注', field: 'remark' },
+]
+
+const editFields = computed(() => [
+  { label: '姓名', field: 'name', type: 'input', required: true },
+  { label: '性别', field: 'gender', type: 'select',
+    options: [{ label: '男', value: '男' }, { label: '女', value: '女' }] },
+  { label: '身份证号', field: 'id_card', type: 'input' },
+  { label: '出生日期', field: 'birth_date', type: 'date' },
+  { label: '民族', field: 'ethnicity', type: 'input' },
+  { label: '文化程度', field: 'education', type: 'input' },
+  { label: '职业', field: 'occupation', type: 'input' },
+  { label: '所属户', field: 'household_id', type: 'select',
+    options: households.value.map((h: any) => ({ label: h.household_no, value: h.id })) },
+  { label: '与户主关系', field: 'relation_to_head', type: 'input' },
+  { label: '住址', field: 'address', type: 'input' },
+  { label: '备注', field: 'remark', type: 'textarea' },
+])
 
 // 编辑弹窗中的联系方式和银行账号
 const editContacts = ref<any[]>([])
@@ -253,7 +374,14 @@ onMounted(fetchList)
       <el-button type="primary" @click="handleSearch">搜索</el-button>
     </div>
 
-    <el-table :data="list" v-loading="loading" stripe>
+    <el-table
+      :data="list"
+      v-loading="loading"
+      stripe
+      row-class-name="row-selected"
+      @selection-change="handleSelectionChange"
+    >
+      <el-table-column type="selection" width="40" />
       <el-table-column prop="name" label="姓名" />
       <el-table-column prop="gender" label="性别" width="60" />
       <el-table-column prop="id_card" label="身份证号" width="180" />
@@ -262,6 +390,11 @@ onMounted(fetchList)
       <el-table-column prop="phones" label="电话" />
       <el-table-column prop="bank_info" label="银行账号" min-width="180" />
       <el-table-column prop="occupation" label="职业" />
+      <el-table-column label="锁定" width="70">
+        <template #default="{ row }">
+          <el-icon v-if="row.is_locked" style="color: var(--notion-orange)"><Lock /></el-icon>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="180" fixed="right">
         <template #default="{ row }">
           <el-button size="small" @click="openEdit(row)">编辑</el-button>
@@ -410,6 +543,73 @@ onMounted(fetchList)
       :batch-api="villagerApi.batchCreate"
       :transform="importTransform"
       @success="fetchList"
+    />
+
+    <!-- 批量操作栏 -->
+    <BatchActionBar
+      :count="selectedCount"
+      :module="MODULE"
+      :locked-count="lockedCount"
+      @view="handleBatchView"
+      @edit="handleBatchEdit"
+      @delete="handleBatchDelete"
+      @lock="handleBatchLock"
+      @unlock="handleBatchUnlock"
+      @export="handleBatchExport"
+    />
+
+    <!-- 查看弹窗 -->
+    <ViewDialog
+      v-model="viewDialogVisible"
+      :title="`查看村民 — ${viewRecord?.name ?? ''}`"
+      :record="viewRecord"
+      :fields="viewFields"
+    />
+
+    <!-- 编辑弹窗（批量操作用 ViewDialog + EditDialog 替代内置表单） -->
+    <el-dialog v-model="editDialogVisible" :title="editRecord?.id ? '编辑村民' : '新增村民'" width="700px">
+      <el-form ref="formRef" :model="editRecord ?? {}" :rules="rules" label-width="100px">
+        <el-row :gutter="16">
+          <el-col :span="12"><el-form-item label="姓名" prop="name"><el-input v-model="editRecord.name" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="性别"><el-select v-model="editRecord.gender" style="width:100%"><el-option label="男" value="男" /><el-option label="女" value="女" /></el-select></el-form-item></el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="12"><el-form-item label="身份证号"><el-input v-model="editRecord.id_card" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="出生日期"><el-input v-model="editRecord.birth_date" /></el-form-item></el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="12"><el-form-item label="民族"><el-input v-model="editRecord.ethnicity" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="文化程度"><el-input v-model="editRecord.education" /></el-form-item></el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="12"><el-form-item label="职业"><el-input v-model="editRecord.occupation" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="所属户"><el-select v-model="editRecord.household_id" style="width:100%" placeholder="请选择户" clearable><el-option v-for="hh in households" :key="hh.id" :label="hh.household_no" :value="hh.id" /></el-select></el-form-item></el-col>
+        </el-row>
+        <el-row :gutter="16">
+          <el-col :span="12"><el-form-item label="与户主关系"><el-input v-model="editRecord.relation_to_head" /></el-form-item></el-col>
+        </el-row>
+        <el-form-item label="住址"><el-input v-model="editRecord.address" /></el-form-item>
+        <el-form-item label="备注"><el-input v-model="editRecord.remark" type="textarea" :rows="2" /></el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="async () => {
+          try {
+            await villagerApi.update(editRecord.id, editRecord)
+            ElMessage.success('更新成功')
+            editDialogVisible = false
+            selection.clear(MODULE)
+            fetchList()
+          } catch(e: any) { ElMessage.error(e?.response?.data?.detail || '更新失败') }
+        }">保存</el-button>
+      </template>
+    </el-dialog>
+
+    <!-- 删除确认弹窗 -->
+    <DeleteConfirmModal
+      v-model="deleteDialogVisible"
+      :count="selectedCount"
+      @confirm="handleDeleteConfirm"
     />
   </div>
 </template>

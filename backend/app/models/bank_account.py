@@ -1,4 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, Text, DateTime
+from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 from app.core.database import Base
 
@@ -15,6 +16,9 @@ class BankAccount(Base):
     account_type = Column(String(50), comment="账户类型: personal/corporate")
     is_active = Column(Integer, default=1, comment="是否有效 0否 1是")
     remark = Column(String(200), comment="备注")
+    is_locked = Column(Integer, default=0, comment="是否锁定，1=锁定，0=未锁定")
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
     # 关联
     villager = relationship("Villager", back_populates="bank_accounts")

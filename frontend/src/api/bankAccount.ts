@@ -8,4 +8,8 @@ export const bankAccountApi = {
   update: (id: number, data: any) => request.put(`/bank-accounts/${id}`, data) as Promise<any>,
   batchCreate: (items: any[]) => request.post("/bank-accounts/batch", { items }) as Promise<any>,
   delete: (id: number) => request.delete(`/bank-accounts/${id}`) as Promise<any>,
+  lock: (id: number) => request.post(`/bank-accounts/${id}/lock`) as Promise<any>,
+  unlock: (id: number) => request.post(`/bank-accounts/${id}/unlock`) as Promise<any>,
+  export: (ids: number[], module: string) =>
+    request.post('/export', { ids, module }, { responseType: 'blob' }) as Promise<any>,
 }

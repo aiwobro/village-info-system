@@ -27,6 +27,7 @@ class AssetUpdate(AssetBase):
 
 class AssetOut(AssetBase):
     id: int
+    is_locked: int = 0
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

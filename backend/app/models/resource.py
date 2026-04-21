@@ -20,6 +20,7 @@ class Resource(Base):
     natural_village_id = Column(Integer, ForeignKey("natural_villages.id"), comment="所属自然村", nullable=True)
     description = Column(Text, comment="描述")
     remark = Column(Text, comment="备注")
+    is_locked = Column(Integer, default=0, comment="是否锁定，1=锁定，0=未锁定")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

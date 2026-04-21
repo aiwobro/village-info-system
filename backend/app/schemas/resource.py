@@ -23,6 +23,7 @@ class ResourceUpdate(ResourceBase):
 
 class ResourceOut(ResourceBase):
     id: int
+    is_locked: int = 0
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

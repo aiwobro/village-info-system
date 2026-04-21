@@ -12,4 +12,5 @@ class User(Base):
     hashed_password = Column(String(200), nullable=False)
     full_name = Column(String(100))
     is_active = Column(Integer, default=1)
+    is_admin = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

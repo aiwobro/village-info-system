@@ -13,6 +13,7 @@ class Contact(Base):
     value = Column(String(100), nullable=False, comment="联系方式值")
     is_primary = Column(Integer, default=0, comment="是否主要联系方式")
     remark = Column(String(200), comment="备注")
+    is_locked = Column(Integer, default=0, comment="是否锁定，1=锁定，0=未锁定")
 
     # 关联
     villager = relationship("Villager", back_populates="contacts")

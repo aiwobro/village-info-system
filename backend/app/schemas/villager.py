@@ -27,6 +27,7 @@ class VillagerUpdate(VillagerBase):
 
 class VillagerOut(VillagerBase):
     id: int
+    is_locked: int = 0
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

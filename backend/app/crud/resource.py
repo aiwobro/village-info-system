@@ -22,6 +22,32 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None, na
 def get_by_id(db: Session, id: int):
     return db.query(Resource).filter(Resource.id == id).first()
 
+def lock(db: Session, id: int):
+    """锁定记录，已锁定返回 "LOCKED"，不存在返回 None，成功返回对象"""
+    db_obj = get_by_id(db, id)
+    if not db_obj:
+        return None
+    if db_obj.is_locked:
+        return "LOCKED"
+    db_obj.is_locked = 1
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+
+def unlock(db: Session, id: int):
+    """解锁记录，未锁定返回 "NOT_LOCKED"，不存在返回 None，成功返回对象"""
+    db_obj = get_by_id(db, id)
+    if not db_obj:
+        return None
+    if not db_obj.is_locked:
+        return "NOT_LOCKED"
+    db_obj.is_locked = 0
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+
 def create(db: Session, obj: ResourceCreate):
     db_obj = Resource(**obj.model_dump())
     db.add(db_obj)
@@ -33,6 +59,8 @@ def update(db: Session, id: int, obj: ResourceUpdate):
     db_obj = get_by_id(db, id)
     if not db_obj:
         return None
+    if db_obj.is_locked:
+        return "LOCKED"
     for key, value in obj.model_dump(exclude_unset=True).items():
         setattr(db_obj, key, value)
     db.commit()
@@ -43,6 +71,8 @@ def delete(db: Session, id: int):
     db_obj = get_by_id(db, id)
     if not db_obj:
         return False
+    if db_obj.is_locked:
+        return "LOCKED"
     db.delete(db_obj)
     db.commit()
     return True

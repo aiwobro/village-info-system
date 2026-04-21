@@ -20,6 +20,7 @@ class ContactUpdate(ContactBase):
 
 class ContactOut(ContactBase):
     id: int
+    is_locked: int = 0
 
     class Config:
         from_attributes = True

@@ -34,10 +34,10 @@ const handleSelect = () => {
 
 <template>
   <!-- 桌面端：固定侧边栏 -->
-  <el-aside v-if="!isMobile" :width="isCollapse ? '64px' : '200px'" class="sidebar">
+  <el-aside v-if="!isMobile" :width="isCollapse ? '64px' : '220px'" class="sidebar">
     <div class="logo">
-      <span v-if="!isCollapse">🏘️ 村庄管理</span>
-      <span v-else>🏘️</span>
+      <span v-if="!isCollapse" class="logo-text">🏘️ 村庄管理</span>
+      <span v-else class="logo-icon">🏘️</span>
     </div>
     <el-menu
       :default-active="route.path"
@@ -53,10 +53,10 @@ const handleSelect = () => {
   </el-aside>
 
   <!-- 移动端：弹出抽屉 -->
-  <el-drawer v-else :model-value="open" direction="ltr" :show-close="false" size="200px" @close="emit('close')" class="mobile-drawer">
+  <el-drawer v-else :model-value="open" direction="ltr" :show-close="false" size="220px" @close="emit('close')" class="mobile-drawer">
     <template #title>
       <div class="logo">
-        <span>🏘️ 村庄管理</span>
+        <span class="logo-text">🏘️ 村庄管理</span>
       </div>
     </template>
     <el-menu
@@ -74,57 +74,127 @@ const handleSelect = () => {
 </template>
 
 <style scoped>
-/* 桌面端 */
+/* ---- Notion Style Sidebar ---- */
+
+/* 桌面端侧边栏 */
 .sidebar {
-  background: #304156;
+  background: #f6f5f4;
   height: 100vh;
-  transition: width 0.3s;
+  transition: width 0.2s ease;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Logo */
+.logo {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
 }
 
-.logo {
-  height: 60px;
-  line-height: 60px;
-  text-align: center;
-  color: #fff;
-  font-size: 18px;
-  font-weight: bold;
-  background: #263445;
+.logo-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: #31302e;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
+.logo-icon {
+  font-size: 20px;
+}
+
+/* 菜单 */
 .sidebar-menu {
   border-right: none;
-  background: #304156;
+  background: transparent;
+  flex: 1;
+  padding: 8px 0;
 }
 
 :deep(.el-menu) {
   background: transparent;
+  border: none;
 }
 
 :deep(.el-menu-item) {
-  color: #bfcbd9;
+  height: 38px;
+  line-height: 38px;
+  margin: 1px 8px;
+  border-radius: 6px;
+  color: #31302e;
+  font-size: 14px;
+  font-weight: 450;
+  transition: background 0.12s ease, color 0.12s ease;
 }
 
-:deep(.el-menu-item:hover),
+:deep(.el-menu-item:hover) {
+  background: rgba(0, 0, 0, 0.06);
+  color: #31302e;
+}
+
 :deep(.el-menu-item.is-active) {
-  background: #263445 !important;
-  color: #409eff;
+  background: rgba(0, 117, 222, 0.1);
+  color: #0075de;
+  font-weight: 600;
+  position: relative;
 }
 
-/* 移动端抽屉 */
+/* 激活态左侧蓝色指示条 */
+:deep(.el-menu-item.is-active)::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 20px;
+  background: #0075de;
+  border-radius: 0 2px 2px 0;
+}
+
+:deep(.el-menu-item .el-icon) {
+  font-size: 15px;
+}
+
+/* 折叠状态 */
+:deep(.el-menu--collapse) {
+  padding: 8px 0;
+}
+
+:deep(.el-menu--collapse .el-menu-item) {
+  margin: 1px 6px;
+  justify-content: center;
+}
+
+/* ---- 移动端抽屉 ---- */
 .mobile-drawer .logo {
-  height: 60px;
-  line-height: 60px;
-  text-align: center;
-  color: #fff;
-  font-size: 18px;
-  font-weight: bold;
-  background: #263445;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.mobile-drawer .logo-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: #31302e;
 }
 
 :deep(.el-drawer__header) {
   padding: 0;
   margin: 0;
-  background: #263445;
+  background: #f6f5f4;
+}
+
+:deep(.el-drawer__body) {
+  padding: 0;
+  background: #f6f5f4;
 }
 </style>

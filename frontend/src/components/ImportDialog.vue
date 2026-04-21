@@ -262,24 +262,27 @@ const handleClose = () => {
   align-items: center;
   gap: 8px;
   padding: 32px;
-  border: 2px dashed #dcdfe6;
+  border: 2px dashed rgba(0, 0, 0, 0.15);
   border-radius: 8px;
   cursor: pointer;
-  color: #606266;
-  transition: all 0.2s;
+  color: #615d59;
+  transition: all 0.15s ease;
+  background: rgba(0, 0, 0, 0.02);
 }
 .upload-label:hover {
-  border-color: #409eff;
-  color: #409eff;
+  border-color: #0075de;
+  color: #0075de;
+  background: rgba(0, 117, 222, 0.04);
 }
 .upload-label .hint {
   font-size: 12px;
-  color: #909399;
+  color: #a39e98;
 }
 .file-name {
   margin-top: 8px;
-  color: #67c23a;
+  color: #1aae39;
   font-size: 14px;
+  font-weight: 500;
 }
 .preview-section {
   margin-top: 8px;
@@ -290,20 +293,23 @@ const handleClose = () => {
   align-items: center;
   margin-bottom: 8px;
   font-size: 14px;
-  color: #606266;
+  color: #615d59;
 }
 .error-hint {
-  color: #f56c6c;
+  color: #dd5b00;
+  font-weight: 500;
 }
 .template-hint {
   padding: 16px;
-  background: #f5f7fa;
+  background: #f6f5f4;
   border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.07);
 }
 .template-title {
-  font-weight: bold;
+  font-weight: 600;
   margin-bottom: 12px;
-  color: #303133;
+  color: #31302e;
+  font-size: 14px;
 }
 .field-list {
   display: flex;
@@ -316,34 +322,38 @@ const handleClose = () => {
   gap: 8px;
 }
 .field-label {
-  color: #606266;
+  color: #615d59;
   min-width: 100px;
+  font-size: 14px;
 }
 .field-key {
-  background: #ebeef5;
+  background: rgba(0, 0, 0, 0.05);
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 12px;
-  color: #909399;
+  color: #615d59;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 .error-list {
   margin-top: 12px;
   max-height: 150px;
   overflow-y: auto;
-  padding: 8px 12px;
-  background: #fef0f0;
-  border-radius: 4px;
+  padding: 10px 14px;
+  background: #fff4f0;
+  border-radius: 6px;
+  border: 1px solid rgba(221, 91, 0, 0.15);
 }
 .error-title {
-  color: #f56c6c;
-  font-weight: bold;
+  color: #dd5b00;
+  font-weight: 600;
   margin-bottom: 4px;
+  font-size: 13px;
 }
 .error-item {
-  color: #f56c6c;
+  color: #dd5b00;
   font-size: 13px;
 }
 .cell-error {
-  color: #f56c6c;
+  color: #dd5b00;
 }
 </style>

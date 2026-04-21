@@ -22,5 +22,6 @@ class Asset(Base):
     status = Column(String(50), default="正常使用", comment="状态(正常使用/报废/出租)")
     villager_id = Column(Integer, ForeignKey("villagers.id"), comment="负责人")
     remark = Column(Text, comment="备注")
+    is_locked = Column(Integer, default=0, comment="是否锁定，1=锁定，0=未锁定")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

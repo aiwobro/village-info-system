@@ -13,6 +13,7 @@ class Household(Base):
     natural_village_id = Column(Integer, ForeignKey("natural_villages.id"), nullable=False, comment="所属自然村")
     head_id = Column(Integer, ForeignKey("villagers.id"), comment="户主ID")
     address = Column(String(200), comment="住址")
+    is_locked = Column(Integer, default=0, comment="是否锁定，1=锁定，0=未锁定")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.schemas.bank_account import BankAccountCreate, BankAccountBatchCreate, BankAccountUpdate, BankAccountOut
-from app.crud.bank_account import get_all, get_by_id, create, update, delete, batch_create
+from app.crud.bank_account import get_all, get_by_id, create, update, delete, batch_create, lock, unlock
 from app.models.user import User
-from app.api.auth import get_current_user
+from app.api.auth import get_current_user, require_admin
 
 router = APIRouter(prefix="/bank-accounts", tags=["银行账号"])
 
@@ -35,7 +35,10 @@ def create_api(obj: BankAccountCreate, db: Session = Depends(get_db), current_us
 
 @router.put("/{id}", response_model=BankAccountOut)
 def update_api(id: int, obj: BankAccountUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    result = update(db, id, obj)
+    try:
+        result = update(db, id, obj)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     if not result:
         raise HTTPException(status_code=404, detail="未找到")
     return result
@@ -43,6 +46,27 @@ def update_api(id: int, obj: BankAccountUpdate, db: Session = Depends(get_db), c
 
 @router.delete("/{id}")
 def delete_api(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    if not delete(db, id):
-        raise HTTPException(status_code=404, detail="未找到")
+    try:
+        if not delete(db, id):
+            raise HTTPException(status_code=404, detail="未找到")
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
     return {"message": "删除成功"}
+
+
+@router.post("/{id}/lock")
+def lock_api(id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
+    result = lock(db, id)
+    if not result:
+        raise HTTPException(status_code=404, detail="未找到")
+    return {"message": "锁定成功"}
+
+
+@router.post("/{id}/unlock")
+def unlock_api(id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
+    result = unlock(db, id)
+    if not result:
+        raise HTTPException(status_code=404, detail="未找到")
+    if result == "NOT_LOCKED":
+        return {"message": "该记录已是解锁状态"}
+    return {"message": "解锁成功"}

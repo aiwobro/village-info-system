@@ -67,7 +67,7 @@ html, body, #app {
   flex: 1;
   padding: 24px;
   overflow-y: auto;
-  background: #f5f7fa;
+  background: #f6f5f4;
 }
 
 .main-content.full-width {
@@ -85,8 +85,9 @@ html, body, #app {
   gap: 12px;
   padding: 0 12px;
   height: 56px;
-  background: #304156;
-  color: #fff;
+  background: #ffffff;
+  color: #31302e;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   position: fixed;
   top: 0;
   left: 0;

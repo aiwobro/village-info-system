@@ -1,11 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { bankAccountApi } from '../api/bankAccount'
 import { villagerApi } from '../api/villager'
 import { adminVillageApi } from '../api/adminVillage'
 import { naturalVillageApi } from '../api/naturalVillage'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import ImportDialog from '../components/ImportDialog.vue'
+import BatchActionBar from '../components/BatchActionBar.vue'
+import ViewDialog from '../components/ViewDialog.vue'
+import EditDialog from '../components/EditDialog.vue'
+import DeleteConfirmModal from '../components/DeleteConfirmModal.vue'
+import { useSelectionStore } from '../stores/selection'
+import { useAuthStore } from '../stores/auth'
 
 const importDialogVisible = ref(false)
 const importFields = [
@@ -145,6 +151,92 @@ const handleSearch = () => {
   fetchList()
 }
 
+const selection = useSelectionStore()
+const auth = useAuthStore()
+const MODULE = 'bank'
+
+const viewDialogVisible = ref(false)
+const viewRecord = ref<any>(null)
+const editDialogVisible = ref(false)
+const editRecord = ref<any>(null)
+const deleteDialogVisible = ref(false)
+
+const selectedCount = computed(() => selection.count(MODULE))
+const selectedIds = computed(() => selection.getSelectedIds(MODULE))
+const lockedCount = computed(() => list.value.filter(r => selectedIds.value.includes(r.id) && r.is_locked).length)
+
+const handleBatchView = () => {
+  if (selectedIds.value.length !== 1) { ElMessage.warning('请选择单条记录查看'); return }
+  viewRecord.value = list.value.find(r => r.id === selectedIds.value[0])
+  viewDialogVisible.value = true
+}
+const handleBatchEdit = () => {
+  if (selectedIds.value.length !== 1) { ElMessage.warning('请选择单条记录进行编辑'); return }
+  editRecord.value = list.value.find(r => r.id === selectedIds.value[0])
+  editDialogVisible.value = true
+}
+const handleBatchDelete = () => { deleteDialogVisible.value = true }
+const handleBatchLock = async () => {
+  try {
+    await ElMessageBox.confirm(`锁定选中的 ${selectedIds.value.length} 条？`, '确认锁定', { type: 'warning' })
+    await Promise.all(selectedIds.value.map(id => bankAccountApi.lock(id)))
+    ElMessage.success('已锁定'); selection.clear(MODULE); fetchList()
+  } catch (e: any) { if (e !== 'cancel') ElMessage.error(e?.response?.data?.detail || '锁定失败') }
+}
+const handleBatchUnlock = async () => {
+  try {
+    await ElMessageBox.confirm(`解锁选中的 ${selectedIds.value.length} 条？`, '确认解锁', { type: 'info' })
+    await Promise.all(selectedIds.value.map(id => bankAccountApi.unlock(id)))
+    ElMessage.success('已解锁'); selection.clear(MODULE); fetchList()
+  } catch (e: any) { if (e !== 'cancel') ElMessage.error(e?.response?.data?.detail || '解锁失败') }
+}
+const handleBatchExport = async () => {
+  const ids = selectedIds.value
+  if (!ids.length) return
+  try {
+    const res = await bankAccountApi.export(ids, 'bank_account') as any
+    const blob = new Blob([res], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a'); a.href = url; a.download = `bank_account_${Date.now()}.xlsx`; a.click()
+    URL.revokeObjectURL(url)
+    ElMessage.success(`导出 ${ids.length} 条`)
+  } catch (e: any) { ElMessage.error(e?.message || '导出失败') }
+}
+const handleDeleteConfirm = async () => {
+  try {
+    await Promise.all(selectedIds.value.map(id => bankAccountApi.delete(id)))
+    ElMessage.success('已删除'); selection.clear(MODULE); deleteDialogVisible.value = false; fetchList()
+  } catch (e: any) { ElMessage.error(e?.response?.data?.detail || '删除失败') }
+}
+const handleSelectionChange = (rows: any[]) => {
+  const pageIds = list.value.map(r => r.id)
+  selection.deselectAll(MODULE, pageIds)
+  if (rows.length) selection.selectAll(MODULE, rows.map((r: any) => r.id))
+}
+
+const viewFields = [
+  { label: '村民', field: 'villager_name' },
+  { label: '开户行', field: 'bank_name' },
+  { label: '开户名', field: 'account_holder' },
+  { label: '卡号', field: 'account_number_encrypted' },
+  { label: '账户类型', field: 'account_type' },
+  { label: '状态', field: 'is_active', type: 'boolean', trueLabel: '有效', falseLabel: '无效' },
+  { label: '备注', field: 'remark' },
+]
+
+const editFields = computed(() => [
+  { label: '村民', field: 'villager_id', type: 'select', required: true,
+    options: villagers.value.map((v: any) => ({ label: v.name, value: v.id })) },
+  { label: '开户行', field: 'bank_name', type: 'input', required: true },
+  { label: '开户名', field: 'account_holder', type: 'input', required: true },
+  { label: '卡号', field: 'account_number_encrypted', type: 'input' },
+  { label: '账户类型', field: 'account_type', type: 'select',
+    options: [{ label: '个人账户', value: '个人账户' }, { label: '对公账户', value: '对公账户' }] },
+  { label: '状态', field: 'is_active', type: 'select',
+    options: [{ label: '有效', value: 1 }, { label: '无效', value: 0 }] },
+  { label: '备注', field: 'remark', type: 'textarea' },
+])
+
 onMounted(fetchList)
 </script>
 
@@ -169,16 +261,18 @@ onMounted(fetchList)
       <el-button type="primary" @click="handleSearch">搜索</el-button>
     </div>
 
-    <el-table :data="list" v-loading="loading" stripe>
+    <el-table :data="list" v-loading="loading" stripe row-class-name="row-selected" @selection-change="handleSelectionChange">
+      <el-table-column type="selection" width="40" />
       <el-table-column prop="villager_name" label="村民" width="100" />
       <el-table-column prop="account_holder" label="开户名" />
       <el-table-column prop="bank_name" label="开户行" />
       <el-table-column prop="account_number_encrypted" label="卡号" />
       <el-table-column prop="account_type" label="账户类型" />
       <el-table-column prop="is_active" label="状态" width="80">
-        <template #default="{ row }">
-          {{ row.is_active === 1 ? '有效' : '无效' }}
-        </template>
+        <template #default="{ row }">{{ row.is_active === 1 ? '有效' : '无效' }}</template>
+      </el-table-column>
+      <el-table-column label="锁定" width="70">
+        <template #default="{ row }"><el-icon v-if="row.is_locked" style="color: var(--notion-orange)"><Lock /></el-icon></template>
       </el-table-column>
       <el-table-column label="操作" width="180">
         <template #default="{ row }">
@@ -246,6 +340,31 @@ onMounted(fetchList)
       :transform="importTransform"
       @success="fetchList"
     />
+
+    <BatchActionBar
+      :count="selectedCount"
+      :module="MODULE"
+      :locked-count="lockedCount"
+      @view="handleBatchView"
+      @edit="handleBatchEdit"
+      @delete="handleBatchDelete"
+      @lock="handleBatchLock"
+      @unlock="handleBatchUnlock"
+      @export="handleBatchExport"
+    />
+
+    <ViewDialog v-model="viewDialogVisible" title="查看银行账号" :record="viewRecord" :fields="viewFields" />
+
+    <EditDialog
+      v-model="editDialogVisible"
+      title="编辑银行账号"
+      :record="editRecord"
+      :fields="editFields"
+      :api="bankAccountApi"
+      @success="() => { selection.clear(MODULE); fetchList() }"
+    />
+
+    <DeleteConfirmModal v-model="deleteDialogVisible" :count="selectedCount" @confirm="handleDeleteConfirm" />
   </div>
 </template>
 

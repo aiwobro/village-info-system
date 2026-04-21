@@ -38,6 +38,8 @@ def update(db: Session, id: int, obj: VillagerUpdate):
     db_obj = get_by_id(db, id)
     if not db_obj:
         return None
+    if db_obj.is_locked:
+        return "LOCKED"
     for key, value in obj.model_dump(exclude_unset=True).items():
         setattr(db_obj, key, value)
     db.commit()
@@ -49,9 +51,33 @@ def delete(db: Session, id: int):
     db_obj = get_by_id(db, id)
     if not db_obj:
         return False
+    if db_obj.is_locked:
+        return "LOCKED"
     db.delete(db_obj)
     db.commit()
     return True
+
+
+def lock(db: Session, id: int):
+    """锁定村民，禁止更新和删除"""
+    db_obj = get_by_id(db, id)
+    if not db_obj:
+        return None
+    db_obj.is_locked = 1
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
+
+
+def unlock(db: Session, id: int):
+    """解锁村民，允许更新和删除"""
+    db_obj = get_by_id(db, id)
+    if not db_obj:
+        return None
+    db_obj.is_locked = 0
+    db.commit()
+    db.refresh(db_obj)
+    return db_obj
 
 
 def batch_create(db: Session, items: list):

@@ -8,4 +8,8 @@ export const contactApi = {
   update: (id: number, data: any) => request.put(`/contacts/${id}`, data) as Promise<any>,
   batchCreate: (items: any[]) => request.post("/contacts/batch", { items }) as Promise<any>,
   delete: (id: number) => request.delete(`/contacts/${id}`) as Promise<any>,
+  lock: (id: number) => request.post(`/contacts/${id}/lock`) as Promise<any>,
+  unlock: (id: number) => request.post(`/contacts/${id}/unlock`) as Promise<any>,
+  export: (ids: number[], module: string) =>
+    request.post('/export', { ids, module }, { responseType: 'blob' }) as Promise<any>,
 }

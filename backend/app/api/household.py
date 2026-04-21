@@ -2,9 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.schemas.household import HouseholdCreate, HouseholdUpdate, HouseholdOut, HouseholdBatchCreate
-from app.crud.household import get_all, get_by_id, create, update, delete, get_stats, batch_create
+from app.crud.household import get_all, get_by_id, create, update, delete, get_stats, batch_create, lock, unlock
 from app.models.user import User
-from app.api.auth import get_current_user
+from app.api.auth import get_current_user, require_admin
 
 router = APIRouter(prefix="/households", tags=["户管理"])
 
@@ -40,6 +40,8 @@ def create_api(obj: HouseholdCreate, db: Session = Depends(get_db), current_user
 @router.put("/{id}", response_model=HouseholdOut)
 def update_api(id: int, obj: HouseholdUpdate, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     result = update(db, id, obj)
+    if result == "LOCKED":
+        raise HTTPException(status_code=403, detail="该记录已锁定，无法编辑")
     if not result:
         raise HTTPException(status_code=404, detail="未找到")
     return result
@@ -47,6 +49,29 @@ def update_api(id: int, obj: HouseholdUpdate, db: Session = Depends(get_db), cur
 
 @router.delete("/{id}")
 def delete_api(id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    if not delete(db, id):
+    result = delete(db, id)
+    if result == "LOCKED":
+        raise HTTPException(status_code=403, detail="该记录已锁定，无法删除")
+    if not result:
         raise HTTPException(status_code=404, detail="未找到")
     return {"message": "删除成功"}
+
+
+@router.post("/{id}/lock")
+def lock_api(id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
+    result = lock(db, id)
+    if not result:
+        raise HTTPException(status_code=404, detail="未找到")
+    if result == "LOCKED":
+        return {"message": "该记录已是锁定状态"}
+    return {"message": "锁定成功"}
+
+
+@router.post("/{id}/unlock")
+def unlock_api(id: int, db: Session = Depends(get_db), current_user: User = Depends(require_admin)):
+    result = unlock(db, id)
+    if not result:
+        raise HTTPException(status_code=404, detail="未找到")
+    if result == "NOT_LOCKED":
+        return {"message": "该记录已是解锁状态"}
+    return {"message": "解锁成功"}

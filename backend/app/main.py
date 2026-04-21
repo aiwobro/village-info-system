@@ -7,6 +7,7 @@ from app.models import AdminVillage, NaturalVillage, Household, Villager, Contac
 from app.models.user import User
 from app.api import admin_village, natural_village, household, villager, contact, bank_account, asset, resource
 from app.api.auth import router as auth_router
+from app.api.export import router as export_router
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -60,3 +61,4 @@ app.include_router(contact.router, prefix=settings.API_V1_STR)
 app.include_router(bank_account.router, prefix=settings.API_V1_STR)
 app.include_router(asset.router, prefix=settings.API_V1_STR)
 app.include_router(resource.router, prefix=settings.API_V1_STR)
+app.include_router(export_router, prefix=settings.API_V1_STR)

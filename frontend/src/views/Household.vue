@@ -210,7 +210,7 @@ const rules = {
 
 const fetchStats = async () => {
   try {
-    const res = await householdApi.getStats({ admin_village_id: filterAdminVillage.value ?? undefined, natural_village_id: filterNaturalVillage.value ?? undefined }) as any
+    const res = await householdApi.getStats({ admin_village_id: filterAdminVillage.value ?? undefined, natural_village_id: filterNaturalVillage.value ?? undefined, is_locked: filterLocked.value ?? undefined }) as any
     stats.value = res
   } catch (e) {
     stats.value = { household_count: 0, villager_count: 0 }
@@ -277,9 +277,16 @@ watch(filterNaturalVillage, () => {
   fetchStats()
 })
 
+watch(filterLocked, () => {
+  page.value = 1
+  fetchList()
+  fetchStats()
+})
+
 const handleSearch = () => {
   page.value = 1
   fetchList()
+  fetchStats()
 }
 
 const openAdd = () => {

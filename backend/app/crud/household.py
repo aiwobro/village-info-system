@@ -64,7 +64,7 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, natural_village_id: in
     return {"items": result, "total": total}
 
 
-def get_stats(db: Session, natural_village_id: int = None, admin_village_id: int = None):
+def get_stats(db: Session, natural_village_id: int = None, admin_village_id: int = None, is_locked: int = None):
     """返回当前筛选条件下的户数和总人数"""
     where = ""
     params: dict = {}
@@ -74,6 +74,9 @@ def get_stats(db: Session, natural_village_id: int = None, admin_village_id: int
     if admin_village_id:
         where += " AND nv.admin_village_id = :admin_village_id"
         params["admin_village_id"] = admin_village_id
+    if is_locked is not None:
+        where += " AND h.is_locked = :is_locked"
+        params["is_locked"] = is_locked
 
     household_count = db.execute(text(f"""
         SELECT COUNT(*) FROM households h

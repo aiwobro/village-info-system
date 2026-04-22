@@ -6,7 +6,7 @@ from app.models.household import Household
 from app.schemas.asset import AssetCreate, AssetUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None, natural_village_id: int = None):
+def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None, natural_village_id: int = None, is_locked: int = None):
     query = db.query(Asset).join(Villager, Asset.villager_id == Villager.id).join(Household, Villager.household_id == Household.id)
     if search:
         query = query.filter(
@@ -17,6 +17,8 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None, na
         )
     if natural_village_id:
         query = query.filter(Household.natural_village_id == natural_village_id)
+    if is_locked is not None:
+        query = query.filter(Asset.is_locked == is_locked)
     total = query.count()
     items = query.offset(skip).limit(limit).all()
     return {"items": items, "total": total}

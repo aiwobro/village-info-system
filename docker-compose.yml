@@ -17,7 +17,7 @@ services:
       - village-net
 
   backend:
-    image: ghcr.io/aiwobro/village-info-system/backend:latest
+    image: village-info-system-backend:latest
     container_name: village_backend
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}

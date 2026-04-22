@@ -6,7 +6,7 @@ from app.models.household import Household
 from app.schemas.bank_account import BankAccountCreate, BankAccountUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100, villager_id: int | None = None, search: str = None, natural_village_id: int = None):
+def get_all(db: Session, skip: int = 0, limit: int = 100, villager_id: int | None = None, search: str = None, natural_village_id: int = None, is_locked: int = None):
     query = db.query(BankAccount).join(Villager, BankAccount.villager_id == Villager.id).join(Household, Villager.household_id == Household.id)
     if villager_id is not None:
         query = query.filter(BankAccount.villager_id == villager_id)
@@ -19,6 +19,8 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, villager_id: int | Non
         ))
     if natural_village_id:
         query = query.filter(Household.natural_village_id == natural_village_id)
+    if is_locked is not None:
+        query = query.filter(BankAccount.is_locked == is_locked)
     items = query.offset(skip).limit(limit).all()
     total = query.count()
     return {"items": items, "total": total}

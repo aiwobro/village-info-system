@@ -4,11 +4,11 @@ import { computed } from 'vue'
 export interface ViewField {
   label: string
   field: string
-  type?: 'text' | 'select' | 'boolean' | 'number' | 'date'
-  options?: { label: string; value: any }[]  // for select type
+  type?: string  // 'text' | 'select' | 'boolean' | 'number' | 'date'
+  options?: { label: string; value: any }[]
   trueLabel?: string
   falseLabel?: string
-  format?: (val: any, row: any) => string  // custom formatter
+  format?: (val: any, row: any) => string
 }
 
 const props = defineProps<{

@@ -93,7 +93,7 @@ const handleDelete = async (row: any) => {
       ElMessage.warning('该行政村下有自然村，无法删除')
       return
     }
-    await ElMessageBox.confirm('确认删除？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确认删除？', '提示', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' })
     await adminVillageApi.delete(row.id)
     ElMessage.success('删除成功')
     fetchList()
@@ -119,7 +119,7 @@ const handleAddNaturalVillage = async () => {
 
 const handleDeleteNaturalVillage = async (id: number) => {
   try {
-    await ElMessageBox.confirm('确认删除该自然村？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确认删除该自然村？', '提示', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' })
     await naturalVillageApi.delete(id)
     editNaturalVillages.value = editNaturalVillages.value.filter(n => n.id !== id)
     ElMessage.success('删除成功')

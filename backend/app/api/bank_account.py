@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.schemas.bank_account import BankAccountCreate, BankAccountBatchCreate, BankAccountUpdate, BankAccountOut
@@ -16,8 +16,8 @@ def batch_create_api(obj: BankAccountBatchCreate, db: Session = Depends(get_db),
 
 
 @router.get("")
-def get_all_api(skip: int = 0, limit: int = 100, villager_id: int | None = None, search: str | None = None, natural_village_id: int | None = None, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
-    return get_all(db, skip=skip, limit=limit, villager_id=villager_id, search=search, natural_village_id=natural_village_id)
+def get_all_api(skip: int = 0, limit: int = 100, villager_id: int | None = None, search: str | None = None, natural_village_id: int | None = None, is_locked: int = Query(None), db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return get_all(db, skip=skip, limit=limit, villager_id=villager_id, search=search, natural_village_id=natural_village_id, is_locked=is_locked)
 
 
 @router.get("/{id}", response_model=BankAccountOut)

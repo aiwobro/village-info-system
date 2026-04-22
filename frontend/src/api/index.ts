@@ -29,8 +29,9 @@ request.interceptors.response.use(
         localStorage.removeItem('token')
         router.push('/login')
         ElMessage.error('登录已过期，请重新登录')
-      } else {
-        ElMessage.error(data.detail || '请求失败')
+      } else if (status >= 500) {
+        // 服务器错误才自动弹框，业务错误（400/403/404）由调用方自己处理
+        ElMessage.error(data.detail || '服务器错误')
       }
     } else {
       ElMessage.error('网络错误')

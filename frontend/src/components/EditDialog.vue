@@ -5,9 +5,9 @@ import { ElMessage } from 'element-plus'
 export interface EditField {
   label: string
   field: string
-  type: 'input' | 'select' | 'number' | 'date' | 'textarea'
+  type: string  // 'input' | 'select' | 'number' | 'date' | 'textarea'
   required?: boolean
-  options?: { label: string; value: any }[]  // for select
+  options?: { label: string; value: any }[]
   rules?: any[]
   placeholder?: string
 }

@@ -104,7 +104,7 @@ const handleSubmit = async () => {
 
 const handleDelete = async (row: any) => {
   try {
-    await ElMessageBox.confirm('确认删除该自然村？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确认删除该自然村？', '提示', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' })
     await naturalVillageApi.delete(row.id)
     ElMessage.success('删除成功')
     fetchList()

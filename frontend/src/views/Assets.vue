@@ -10,7 +10,6 @@ import ViewDialog from '../components/ViewDialog.vue'
 import EditDialog from '../components/EditDialog.vue'
 import DeleteConfirmModal from '../components/DeleteConfirmModal.vue'
 import { useSelectionStore } from '../stores/selection'
-import { useAuthStore } from '../stores/auth'
 
 const importDialogVisible = ref(false)
 const importFields = [
@@ -42,6 +41,7 @@ const adminVillages = ref<any[]>([])
 const naturalVillages = ref<any[]>([])
 const filterAdminVillage = ref<number | null>(null)
 const filterNaturalVillage = ref<number | null>(null)
+const filterLocked = ref<number | null>(null)
 
 const form = ref({
   id: null as number | null,
@@ -70,7 +70,7 @@ const fetchList = async () => {
   try {
     const skip = (page.value - 1) * pageSize.value
     const [data, avs, nvs] = await Promise.all([
-      assetApi.getAll({ skip, limit: pageSize.value, search: search.value, natural_village_id: filterNaturalVillage.value ?? undefined }) as Promise<any>,
+      assetApi.getAll({ skip, limit: pageSize.value, search: search.value, natural_village_id: filterNaturalVillage.value ?? undefined, is_locked: filterLocked.value ?? undefined }) as Promise<any>,
       adminVillageApi.getAll({ limit: 100 }) as Promise<any>,
       naturalVillageApi.getAll({ limit: 5000 }) as Promise<any>,
     ])
@@ -122,7 +122,7 @@ const handleSubmit = async () => {
 
 const handleDelete = async (id: number) => {
   try {
-    await ElMessageBox.confirm('确认删除该资产？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确认删除该资产？', '提示', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' })
     await assetApi.delete(id)
     ElMessage.success('删除成功')
     fetchList()
@@ -132,7 +132,6 @@ const handleDelete = async (id: number) => {
 watch([page, pageSize], () => fetchList())
 
 const selection = useSelectionStore()
-const auth = useAuthStore()
 const MODULE = 'asset'
 
 const viewDialogVisible = ref(false)
@@ -158,14 +157,14 @@ const handleBatchEdit = () => {
 const handleBatchDelete = () => { deleteDialogVisible.value = true }
 const handleBatchLock = async () => {
   try {
-    await ElMessageBox.confirm(`锁定选中的 ${selectedIds.value.length} 条？`, '确认锁定', { type: 'warning' })
+    await ElMessageBox.confirm(`锁定选中的 ${selectedIds.value.length} 条？`, '确认锁定', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' })
     await Promise.all(selectedIds.value.map(id => assetApi.lock(id)))
     ElMessage.success('已锁定'); selection.clear(MODULE); fetchList()
   } catch (e: any) { if (e !== 'cancel') ElMessage.error(e?.response?.data?.detail || '锁定失败') }
 }
 const handleBatchUnlock = async () => {
   try {
-    await ElMessageBox.confirm(`解锁选中的 ${selectedIds.value.length} 条？`, '确认解锁', { type: 'info' })
+    await ElMessageBox.confirm(`解锁选中的 ${selectedIds.value.length} 条？`, '确认解锁', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'info' })
     await Promise.all(selectedIds.value.map(id => assetApi.unlock(id)))
     ElMessage.success('已解锁'); selection.clear(MODULE); fetchList()
   } catch (e: any) { if (e !== 'cancel') ElMessage.error(e?.response?.data?.detail || '解锁失败') }
@@ -249,6 +248,10 @@ onMounted(fetchList)
         <el-option v-for="nv in (filterAdminVillage ? naturalVillages.filter((n: any) => n.admin_village_id === filterAdminVillage) : naturalVillages)" :key="nv.id" :label="nv.name" :value="nv.id" />
       </el-select>
       <el-input v-model="search" placeholder="搜索名称/编码" style="width: 240px" @keyup.enter="handleSearch" />
+      <el-select v-model="filterLocked" placeholder="按锁定筛选" clearable style="width: 130px" @change="handleSearch">
+        <el-option label="已锁定" :value="1" />
+        <el-option label="未锁定" :value="0" />
+      </el-select>
       <el-button type="primary" @click="handleSearch">搜索</el-button>
     </div>
 

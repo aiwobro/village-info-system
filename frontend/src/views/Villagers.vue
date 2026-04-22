@@ -10,10 +10,8 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import ImportDialog from '../components/ImportDialog.vue'
 import BatchActionBar from '../components/BatchActionBar.vue'
 import ViewDialog from '../components/ViewDialog.vue'
-import EditDialog from '../components/EditDialog.vue'
 import DeleteConfirmModal from '../components/DeleteConfirmModal.vue'
 import { useSelectionStore } from '../stores/selection'
-import { useAuthStore } from '../stores/auth'
 
 const importDialogVisible = ref(false)
 const importFields = [
@@ -35,6 +33,7 @@ const adminVillages = ref<any[]>([])
 const naturalVillages = ref<any[]>([])
 const filterAdminVillage = ref<number | null>(null)
 const filterNaturalVillage = ref<number | null>(null)
+const filterLocked = ref<number | null>(null)
 
 const importTransform = (record: any) => {
   if (record.household_id && typeof record.household_id === 'string') {
@@ -63,7 +62,6 @@ const dialogVisible = ref(false)
 const isEdit = ref(false)
 const formRef = ref()
 const selection = useSelectionStore()
-const auth = useAuthStore()
 const MODULE = 'villager'
 
 // Batch action bar state
@@ -99,7 +97,7 @@ const handleBatchLock = async () => {
   const ids = selectedIds.value
   if (!ids.length) return
   try {
-    await ElMessageBox.confirm(`锁定选中的 ${ids.length} 条记录？`, '确认锁定', { type: 'warning' })
+    await ElMessageBox.confirm(`锁定选中的 ${ids.length} 条记录？`, '确认锁定', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' })
     await Promise.all(ids.map(id => villagerApi.lock(id)))
     ElMessage.success(`已锁定 ${ids.length} 条`)
     selection.clear(MODULE); fetchList()
@@ -110,7 +108,7 @@ const handleBatchUnlock = async () => {
   const ids = selectedIds.value
   if (!ids.length) return
   try {
-    await ElMessageBox.confirm(`解锁选中的 ${ids.length} 条记录？`, '确认解锁', { type: 'info' })
+    await ElMessageBox.confirm(`解锁选中的 ${ids.length} 条记录？`, '确认解锁', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'info' })
     await Promise.all(ids.map(id => villagerApi.unlock(id)))
     ElMessage.success(`已解锁 ${ids.length} 条`)
     selection.clear(MODULE); fetchList()
@@ -162,21 +160,6 @@ const viewFields = [
   { label: '备注', field: 'remark' },
 ]
 
-const editFields = computed(() => [
-  { label: '姓名', field: 'name', type: 'input', required: true },
-  { label: '性别', field: 'gender', type: 'select',
-    options: [{ label: '男', value: '男' }, { label: '女', value: '女' }] },
-  { label: '身份证号', field: 'id_card', type: 'input' },
-  { label: '出生日期', field: 'birth_date', type: 'date' },
-  { label: '民族', field: 'ethnicity', type: 'input' },
-  { label: '文化程度', field: 'education', type: 'input' },
-  { label: '职业', field: 'occupation', type: 'input' },
-  { label: '所属户', field: 'household_id', type: 'select',
-    options: households.value.map((h: any) => ({ label: h.household_no, value: h.id })) },
-  { label: '与户主关系', field: 'relation_to_head', type: 'input' },
-  { label: '住址', field: 'address', type: 'input' },
-  { label: '备注', field: 'remark', type: 'textarea' },
-])
 
 // 编辑弹窗中的联系方式和银行账号
 const editContacts = ref<any[]>([])
@@ -208,7 +191,7 @@ const fetchList = async () => {
   try {
     const skip = (page.value - 1) * pageSize.value
     const [data, hhs, nvs, avs, contactsData, banksData] = await Promise.all([
-      villagerApi.getAll({ skip, limit: pageSize.value, search: search.value, natural_village_id: filterNaturalVillage.value ?? undefined }),
+      villagerApi.getAll({ skip, limit: pageSize.value, search: search.value, natural_village_id: filterNaturalVillage.value ?? undefined, is_locked: filterLocked.value ?? undefined }),
       householdApi.getAll({ limit: 5000 }) as Promise<any>,
       naturalVillageApi.getAll({ limit: 5000 }) as Promise<any>,
       adminVillageApi.getAll({ limit: 100 }) as Promise<any>,
@@ -289,7 +272,7 @@ const handleSubmit = async () => {
 
 const handleDelete = async (id: number) => {
   try {
-    await ElMessageBox.confirm('确认删除该村民？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确认删除该村民？', '提示', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' })
     await villagerApi.delete(id)
     ElMessage.success('删除成功')
     fetchList()
@@ -298,7 +281,7 @@ const handleDelete = async (id: number) => {
 
 const handleDeleteContact = async (id: number) => {
   try {
-    await ElMessageBox.confirm('确认删除该联系方式？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确认删除该联系方式？', '提示', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' })
     await contactApi.delete(id)
     editContacts.value = editContacts.value.filter(c => c.id !== id)
     fetchList()
@@ -325,7 +308,7 @@ const handleAddContact = async () => {
 
 const handleDeleteBank = async (id: number) => {
   try {
-    await ElMessageBox.confirm('确认删除该银行账号？', '提示', { type: 'warning' })
+    await ElMessageBox.confirm('确认删除该银行账号？', '提示', { confirmButtonText: '确认', cancelButtonText: '取消', type: 'warning' })
     await bankAccountApi.delete(id)
     editBanks.value = editBanks.value.filter(b => b.id !== id)
     fetchList()
@@ -371,6 +354,10 @@ onMounted(fetchList)
         <el-option v-for="nv in (filterAdminVillage ? naturalVillages.filter((n: any) => n.admin_village_id === filterAdminVillage) : naturalVillages)" :key="nv.id" :label="nv.name" :value="nv.id" />
       </el-select>
       <el-input v-model="search" placeholder="搜索姓名/身份证" style="width: 280px" @keyup.enter="handleSearch" />
+      <el-select v-model="filterLocked" placeholder="按锁定筛选" clearable style="width: 130px" @change="handleSearch">
+        <el-option label="已锁定" :value="1" />
+        <el-option label="未锁定" :value="0" />
+      </el-select>
       <el-button type="primary" @click="handleSearch">搜索</el-button>
     </div>
 

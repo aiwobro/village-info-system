@@ -4,7 +4,7 @@ from app.models.household import Household
 from app.schemas.household import HouseholdCreate, HouseholdUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100, natural_village_id: int = None, admin_village_id: int = None, search: str = None):
+def get_all(db: Session, skip: int = 0, limit: int = 100, natural_village_id: int = None, admin_village_id: int = None, search: str = None, is_locked: int = None):
     # 动态WHERE条件
     where = ""
     params: dict = {"skip": skip, "limit": limit}
@@ -17,10 +17,13 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, natural_village_id: in
     if search:
         where += " AND h.id IN (SELECT household_id FROM villagers WHERE (name ILIKE :search OR id_card ILIKE :search) AND household_id IS NOT NULL)"
         params["search"] = f"%{search}%"
+    if is_locked is not None:
+        where += " AND h.is_locked = :is_locked"
+        params["is_locked"] = is_locked
 
     sql = text(f"""
         SELECT
-            h.id, h.household_no, h.natural_village_id, h.head_id, h.address,
+            h.id, h.household_no, h.natural_village_id, h.head_id, h.address, h.is_locked,
             h.created_at, h.updated_at,
             head.name as head_name,
             COUNT(m.id) as member_count
@@ -42,7 +45,7 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, natural_village_id: in
         LEFT JOIN villagers head ON h.id = head.household_id AND head.relation_to_head = '户主'
         WHERE 1=1 {where}
     """)
-    total = db.execute(count_sql, {k: v for k, v in params.items() if k in ("natural_village_id", "admin_village_id", "search")}).scalar()
+    total = db.execute(count_sql, {k: v for k, v in params.items() if k in ("natural_village_id", "admin_village_id", "search", "is_locked")}).scalar()
 
     result = []
     for r in rows:
@@ -52,6 +55,7 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, natural_village_id: in
             "natural_village_id": r.natural_village_id,
             "head_id": r.head_id,
             "address": r.address,
+            "is_locked": r.is_locked,
             "created_at": r.created_at,
             "updated_at": r.updated_at,
             "head_name": r.head_name,

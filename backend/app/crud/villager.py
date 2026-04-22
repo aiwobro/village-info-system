@@ -6,7 +6,7 @@ from app.models.natural_village import NaturalVillage
 from app.schemas.villager import VillagerCreate, VillagerUpdate
 
 
-def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None, household_id: int = None, natural_village_id: int = None):
+def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None, household_id: int = None, natural_village_id: int = None, is_locked: int = None):
     q = db.query(Villager).join(Household, Villager.household_id == Household.id).join(NaturalVillage, Household.natural_village_id == NaturalVillage.id)
     if search:
         q = q.filter(or_(
@@ -17,6 +17,8 @@ def get_all(db: Session, skip: int = 0, limit: int = 100, search: str = None, ho
         q = q.filter(Villager.household_id == household_id)
     if natural_village_id:
         q = q.filter(Household.natural_village_id == natural_village_id)
+    if is_locked is not None:
+        q = q.filter(Villager.is_locked == is_locked)
     total = q.count()
     items = q.offset(skip).limit(limit).all()
     return {"items": items, "total": total}

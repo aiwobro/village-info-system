@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 
 export const useSelectionStore = defineStore('selection', () => {
   // 选中 ID 集合，key 为 "module:id"

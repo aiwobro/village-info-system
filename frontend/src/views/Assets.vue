@@ -247,11 +247,11 @@ onMounted(fetchList)
       <el-select v-model="filterNaturalVillage" placeholder="按自然村筛选" clearable style="width: 200px" @change="handleSearch">
         <el-option v-for="nv in (filterAdminVillage ? naturalVillages.filter((n: any) => n.admin_village_id === filterAdminVillage) : naturalVillages)" :key="nv.id" :label="nv.name" :value="nv.id" />
       </el-select>
-      <el-input v-model="search" placeholder="搜索名称/编码" style="width: 240px" @keyup.enter="handleSearch" />
       <el-select v-model="filterLocked" placeholder="按锁定筛选" clearable style="width: 130px" @change="handleSearch">
         <el-option label="已锁定" :value="1" />
         <el-option label="未锁定" :value="0" />
       </el-select>
+      <el-input v-model="search" placeholder="搜索名称/编码" style="width: 240px" @keyup.enter="handleSearch" />
       <el-button type="primary" @click="handleSearch">搜索</el-button>
     </div>
 

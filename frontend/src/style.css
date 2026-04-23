@@ -1,62 +1,65 @@
 /* ============================================================
-   Airtable Design System — Global Styles
-   Based on Airtable's clean enterprise palette
-   Deep navy text, Airtable Blue accent, Swiss-precision typography
+   Corporate Modern Design System — Tech Blue
+   Professional government/village management aesthetic
    ============================================================ */
 
-/* --- Inter Font --- */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 /* ============================================================
-   CSS Custom Properties — Airtable Color Palette
+   CSS Custom Properties — Tech Blue Palette
    ============================================================ */
 :root {
-  /* Primary */
-  --airtable-navy: #181d26;
-  --airtable-blue: #1b61c9;
-  --airtable-blue-dark: #1447a6;
-  --airtable-white: #ffffff;
+  /* Primary — Tech Blue */
+  --corp-blue: #2563eb;
+  --corp-blue-dark: #1d4ed8;
+  --corp-blue-light: #3b82f6;
+  --corp-blue-bg: #eff6ff;
+  --corp-blue-hover: rgba(37, 99, 235, 0.08);
 
   /* Surface */
-  --airtable-surface: #f8fafc;
-  --airtable-surface-alt: #f1f5f9;
-  --airtable-border: #e0e2e6;
-  --airtable-border-strong: #c8cdd6;
+  --corp-white: #ffffff;
+  --corp-bg: #f8fafc;
+  --corp-surface: #f1f5f9;
+  --corp-surface-alt: #e8edf3;
+
+  /* Border */
+  --corp-border: #e2e8f0;
+  --corp-border-strong: #cbd5e1;
 
   /* Text */
-  --airtable-text-primary: #181d26;
-  --airtable-text-secondary: #4b5563;
-  --airtable-text-muted: #9ca3af;
-  --airtable-text-link: #1b61c9;
+  --corp-text-primary: #0f172a;
+  --corp-text-secondary: #475569;
+  --corp-text-muted: #94a3b8;
 
   /* Interactive */
-  --airtable-focus: rgba(27, 97, 201, 0.25);
-  --airtable-hover-bg: rgba(0, 0, 0, 0.04);
+  --corp-focus: rgba(37, 99, 235, 0.2);
+  --corp-hover-bg: rgba(37, 99, 235, 0.04);
 
   /* Status */
-  --airtable-success: #006400;
-  --airtable-danger: #dc2626;
-  --airtable-warning: #b45309;
+  --corp-success: #10b981;
+  --corp-success-bg: #ecfdf5;
+  --corp-warning: #f59e0b;
+  --corp-warning-bg: #fffbeb;
+  --corp-danger: #ef4444;
+  --corp-danger-bg: #fef2f2;
+  --corp-info: #06b6d4;
+  --corp-info-bg: #ecfeff;
 
-  /* Shadows — Blue-tinted multi-layer (Airtable signature) */
-  --airtable-shadow-card:
-    0 0 0 1px rgba(0, 0, 0, 0.05),
-    0 1px 3px rgba(0, 0, 0, 0.08),
-    0 2px 8px rgba(45, 127, 249, 0.08);
+  /* Shadows — Clean corporate multi-layer */
+  --corp-shadow-card:
+    0 1px 3px rgba(0, 0, 0, 0.06),
+    0 1px 2px rgba(0, 0, 0, 0.04);
 
-  --airtable-shadow-hover:
-    0 0 0 1px rgba(0, 0, 0, 0.08),
-    0 4px 12px rgba(0, 0, 0, 0.1),
-    0 8px 24px rgba(45, 127, 249, 0.12);
+  --corp-shadow-hover:
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 2px 4px rgba(0, 0, 0, 0.04);
 
-  --airtable-shadow-modal:
-    0 0 0 1px rgba(0, 0, 0, 0.06),
-    0 8px 32px rgba(0, 0, 0, 0.12),
-    0 16px 48px rgba(45, 127, 249, 0.16);
+  --corp-shadow-modal:
+    0 20px 60px rgba(0, 0, 0, 0.12),
+    0 8px 24px rgba(0, 0, 0, 0.08);
 
   /* Typography */
-  --airtable-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --airtable-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --corp-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
   /* Spacing base: 8px */
   --space-1: 4px;
@@ -86,16 +89,16 @@
 
 html, body {
   height: 100%;
-  font-family: var(--airtable-font);
-  font-size: 15px;
+  font-family: var(--corp-font);
+  font-size: 14px;
   line-height: 1.5;
-  color: var(--airtable-text-primary);
-  background: var(--airtable-white);
+  color: var(--corp-text-primary);
+  background: var(--corp-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
   color-scheme: light;
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
 }
 
 #app {
@@ -103,20 +106,20 @@ html, body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--airtable-font);
-  color: var(--airtable-text-primary);
+  font-family: var(--corp-font);
+  color: var(--corp-text-primary);
   font-weight: 600;
   line-height: 1.3;
 }
 
 h1 {
-  font-size: 2rem;
+  font-size: 1.75rem;
   font-weight: 700;
   letter-spacing: -0.025em;
 }
 
 h2 {
-  font-size: 1.5rem;
+  font-size: 1.375rem;
   font-weight: 700;
   letter-spacing: -0.015em;
 }
@@ -127,9 +130,8 @@ h3 {
 }
 
 a {
-  color: var(--airtable-text-link);
+  color: var(--corp-blue);
   text-decoration: none;
-  letter-spacing: 0.01em;
 }
 
 a:hover {
@@ -140,41 +142,35 @@ a:hover {
    Element Plus — CSS Variables Override
    ============================================================ */
 :root {
-  /* Primary — Airtable Blue */
-  --el-color-primary: #1b61c9;
-  --el-color-primary-light-3: #4a7fd4;
-  --el-color-primary-light-5: #7aa3df;
-  --el-color-primary-light-7: #adc7ea;
-  --el-color-primary-light-8: #c8ddf4;
-  --el-color-primary-light-9: #eef4fd;
-  --el-color-primary-dark-2: #1447a6;
+  --el-color-primary: #2563eb;
+  --el-color-primary-light-3: #60a5fa;
+  --el-color-primary-light-5: #93c5fd;
+  --el-color-primary-light-7: #bfdbfe;
+  --el-color-primary-light-8: #dbeafe;
+  --el-color-primary-light-9: #eff6ff;
+  --el-color-primary-dark-2: #1d4ed8;
 
-  /* Border */
-  --el-border-color: #e0e2e6;
-  --el-border-color-light: #e8eaed;
-  --el-border-color-lighter: #f1f3f5;
+  --el-border-color: #e2e8f0;
+  --el-border-color-light: #e8edf3;
+  --el-border-color-lighter: #f1f5f9;
   --el-border-radius-base: 4px;
   --el-border-radius-small: 3px;
   --el-border-radius-round: 4px;
 
-  /* Text */
-  --el-text-color-primary: #181d26;
-  --el-text-color-regular: #374151;
-  --el-text-color-secondary: #6b7280;
-  --el-text-color-placeholder: #9ca3af;
-  --el-text-color-disabled: #d1d5db;
+  --el-text-color-primary: #0f172a;
+  --el-text-color-regular: #334155;
+  --el-text-color-secondary: #475569;
+  --el-text-color-placeholder: #94a3b8;
+  --el-text-color-disabled: #cbd5e1;
 
-  /* Background */
   --el-bg-color: #ffffff;
   --el-bg-color-page: #f8fafc;
   --el-bg-color-overlay: #ffffff;
 
-  /* Box shadow */
   --el-box-shadow-light: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 8px rgba(0, 0, 0, 0.04);
-  --el-box-shadow-lighter: 0 0 0 1px rgba(0, 0, 0, 0.05);
-  --el-box-shadow-base: var(--airtable-shadow-card);
+  --el-box-shadow-lighter: 0 0 0 1px rgba(0, 0, 0, 0.04);
+  --el-box-shadow-base: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
 
-  /* Font */
   --el-font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
 
@@ -185,224 +181,216 @@ a:hover {
 /* --- Buttons --- */
 .el-button {
   border-radius: var(--radius-sm);
-  font-family: var(--airtable-font);
+  font-family: var(--corp-font);
   font-weight: 500;
   font-size: 14px;
-  letter-spacing: 0.02em;
   transition: all 0.15s ease;
   border: 1px solid transparent;
   padding: 8px 16px;
   height: 36px;
-}
-
-.el-button:hover {
-  transform: translateY(-1px);
+  letter-spacing: 0;
 }
 
 .el-button:active {
-  transform: translateY(0);
+  transform: translateY(1px);
 }
 
 .el-button--primary {
-  background: var(--airtable-blue);
-  border-color: var(--airtable-blue);
+  background: var(--corp-blue);
+  border-color: var(--corp-blue);
   color: #ffffff;
   font-weight: 600;
 }
 
 .el-button--primary:hover {
-  background: var(--airtable-blue-dark);
-  border-color: var(--airtable-blue-dark);
+  background: var(--corp-blue-dark);
+  border-color: var(--corp-blue-dark);
   color: #ffffff;
-  box-shadow: 0 2px 8px rgba(27, 97, 201, 0.3);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
 }
 
 .el-button--default {
-  background: var(--airtable-white);
-  border-color: var(--airtable-border);
-  color: var(--airtable-text-primary);
+  background: var(--corp-white);
+  border-color: var(--corp-border);
+  color: var(--corp-text-secondary);
 }
 
 .el-button--default:hover {
-  background: var(--airtable-surface);
-  border-color: var(--airtable-border-strong);
-  color: var(--airtable-text-primary);
+  background: var(--corp-surface);
+  border-color: var(--corp-border-strong);
+  color: var(--corp-text-primary);
 }
 
 .el-button--text {
-  color: var(--airtable-text-secondary);
+  color: var(--corp-text-secondary);
   font-weight: 500;
 }
 
 .el-button--text:hover {
-  color: var(--airtable-blue);
-  background: var(--airtable-surface);
+  color: var(--corp-blue);
+  background: var(--corp-blue-bg);
   border-color: transparent;
 }
 
 .el-button--danger {
-  background: var(--airtable-danger);
-  border-color: var(--airtable-danger);
+  background: var(--corp-danger);
+  border-color: var(--corp-danger);
   color: #ffffff;
   font-weight: 600;
 }
 
 .el-button--danger:hover {
-  background: #b91c1c;
-  border-color: #b91c1c;
+  background: #dc2626;
+  border-color: #dc2626;
   color: #ffffff;
 }
 
 /* --- Inputs --- */
 .el-input__wrapper {
   border-radius: var(--radius-sm);
-  box-shadow: 0 0 0 1px var(--airtable-border) !important;
-  background: var(--airtable-white);
+  box-shadow: 0 0 0 1px var(--corp-border) !important;
+  background: var(--corp-white);
   transition: box-shadow 0.15s ease;
 }
 
 .el-input__wrapper:hover {
-  box-shadow: 0 0 0 1px var(--airtable-border-strong) !important;
+  box-shadow: 0 0 0 1px var(--corp-border-strong) !important;
 }
 
 .el-input__wrapper.is-focus {
-  box-shadow: 0 0 0 2px var(--airtable-focus) !important;
+  box-shadow: 0 0 0 2px var(--corp-focus) !important;
 }
 
 .el-input__inner {
-  font-family: var(--airtable-font);
-  color: var(--airtable-text-primary);
+  font-family: var(--corp-font);
+  color: var(--corp-text-primary);
   font-size: 14px;
-  letter-spacing: 0.01em;
 }
 
 .el-input__inner::placeholder {
-  color: var(--airtable-text-muted);
+  color: var(--corp-text-muted);
 }
 
 /* --- Select --- */
 .el-select__wrapper {
   border-radius: var(--radius-sm);
-  box-shadow: 0 0 0 1px var(--airtable-border) !important;
-  background: var(--airtable-white);
-  font-family: var(--airtable-font);
+  box-shadow: 0 0 0 1px var(--corp-border) !important;
+  background: var(--corp-white);
+  font-family: var(--corp-font);
   font-size: 14px;
 }
 
 .el-select__wrapper:hover {
-  box-shadow: 0 0 0 1px var(--airtable-border-strong) !important;
+  box-shadow: 0 0 0 1px var(--corp-border-strong) !important;
 }
 
 .el-select__wrapper.is-focused {
-  box-shadow: 0 0 0 2px var(--airtable-focus) !important;
+  box-shadow: 0 0 0 2px var(--corp-focus) !important;
 }
 
 /* --- Form labels --- */
 .el-form-item__label {
-  font-family: var(--airtable-font);
+  font-family: var(--corp-font);
   font-weight: 600;
   font-size: 13px;
-  letter-spacing: 0.03em;
-  color: var(--airtable-text-secondary);
-  text-transform: uppercase;
+  letter-spacing: 0;
+  color: var(--corp-text-secondary);
 }
 
 /* --- Cards --- */
 .el-card {
   border-radius: var(--radius-lg);
-  border: 1px solid var(--airtable-border);
-  box-shadow: var(--airtable-shadow-card);
-  background: var(--airtable-white);
+  border: 1px solid var(--corp-border);
+  box-shadow: var(--corp-shadow-card);
+  background: var(--corp-white);
 }
 
 .el-card:hover {
-  box-shadow: var(--airtable-shadow-hover);
-  border-color: var(--airtable-border-strong);
+  box-shadow: var(--corp-shadow-hover);
+  border-color: var(--corp-border-strong);
 }
 
 /* --- Tables --- */
 .el-table {
-  --el-table-border-color: var(--airtable-border);
-  --el-table-header-bg-color: var(--airtable-white);
-  --el-table-header-text-color: var(--airtable-text-secondary);
-  --el-table-row-hover-bg-color: rgba(27, 97, 201, 0.04);
-  --el-table-bg-color: var(--airtable-white);
-  --el-table-tr-bg-color: var(--airtable-white);
-  --el-table-fixed-box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04);
-  font-family: var(--airtable-font);
+  --el-table-border-color: var(--corp-border);
+  --el-table-header-bg-color: var(--corp-white);
+  --el-table-header-text-color: var(--corp-text-secondary);
+  --el-table-row-hover-bg-color: var(--corp-blue-bg);
+  --el-table-bg-color: var(--corp-white);
+  --el-table-tr-bg-color: var(--corp-white);
+  --el-table-fixed-box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.03);
+  font-family: var(--corp-font);
   font-size: 14px;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  border: 1px solid var(--airtable-border);
-  letter-spacing: 0.01em;
+  border: 1px solid var(--corp-border);
 }
 
-/* 表头 — 白色底 + 灰色字 + 细底边线，清晰区别于数据区 */
+/* 表头 — 白色底 + 深色字 + 底部双线 */
 .el-table th.el-table__cell {
-  background: var(--airtable-white);
+  background: var(--corp-white);
   font-weight: 700;
   font-size: 12px;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--airtable-text-secondary);
-  border-bottom: 2px solid var(--airtable-border);
+  letter-spacing: 0.04em;
+  color: var(--corp-text-secondary);
+  border-bottom: 2px solid var(--corp-border);
   padding: 12px 16px;
 }
 
 .el-table td.el-table__cell {
-  border-bottom: 1px solid var(--airtable-border-lighter);
-  color: var(--airtable-text-primary);
+  border-bottom: 1px solid var(--corp-border);
+  color: var(--corp-text-primary);
   padding: 12px 16px;
 }
 
-/* 斑马条纹 — 显式设置单元格背景，增大对比度 */
+/* 斑马条纹 — 白 / 浅蓝灰交替 */
 .el-table .el-table__body > tbody > tr:nth-child(odd) > td.el-table__cell {
   background: #ffffff !important;
 }
 .el-table .el-table__body > tbody > tr:nth-child(even) > td.el-table__cell {
-  background: #f0f0ef !important;
+  background: #f8fafc !important;
 }
 
 .el-table .el-table__body > tbody > tr:hover > td.el-table__cell {
-  background: #e8eef7 !important;
+  background: var(--corp-blue-bg) !important;
 }
 
 /* 选中行 */
 .el-table__body tr.row-selected > td.el-table__cell {
-  background: rgba(27, 97, 201, 0.08) !important;
+  background: #dbeafe !important;
 }
 
 .el-table__body tr.row-selected:hover > td.el-table__cell {
-  background: rgba(27, 97, 201, 0.1) !important;
+  background: #bfdbfe !important;
 }
 
 /* 锁定行图标 */
 .row-locked .el-icon {
-  color: #b45309;
+  color: var(--corp-warning);
 }
 
 .row-unlocked .el-icon {
-  color: var(--airtable-text-muted);
+  color: var(--corp-text-muted);
 }
 
 /* --- Dialog / Modal --- */
 .el-dialog {
   border-radius: var(--radius-xl);
-  border: 1px solid var(--airtable-border);
-  box-shadow: var(--airtable-shadow-modal);
+  border: 1px solid var(--corp-border);
+  box-shadow: var(--corp-shadow-modal);
 }
 
 .el-dialog__header {
-  border-bottom: 1px solid var(--airtable-border);
+  border-bottom: 1px solid var(--corp-border);
   padding: var(--space-4) var(--space-5);
-  background: var(--airtable-white);
+  background: var(--corp-white);
 }
 
 .el-dialog__title {
-  font-family: var(--airtable-font);
+  font-family: var(--corp-font);
   font-weight: 700;
   font-size: 16px;
-  color: var(--airtable-text-primary);
+  color: var(--corp-text-primary);
   letter-spacing: -0.01em;
 }
 
@@ -411,84 +399,82 @@ a:hover {
 }
 
 .el-dialog__footer {
-  border-top: 1px solid var(--airtable-border);
+  border-top: 1px solid var(--corp-border);
   padding: var(--space-4) var(--space-5);
 }
 
 /* --- Pagination --- */
 .el-pagination {
   --el-pagination-bg-color: transparent;
-  --el-pagination-button-bg-color: var(--airtable-white);
-  --el-pagination-hover-color: var(--airtable-blue);
-  font-family: var(--airtable-font);
+  --el-pagination-button-bg-color: var(--corp-white);
+  --el-pagination-hover-color: var(--corp-blue);
+  font-family: var(--corp-font);
   font-size: 14px;
 }
 
 .el-pagination button,
 .el-pager li {
   border-radius: var(--radius-sm);
-  border: 1px solid var(--airtable-border);
+  border: 1px solid var(--corp-border);
 }
 
 .el-pager li.is-active {
-  background: var(--airtable-blue);
+  background: var(--corp-blue);
   color: white;
-  border-color: var(--airtable-blue);
+  border-color: var(--corp-blue);
   font-weight: 600;
 }
 
 /* --- Message / Notification --- */
 .el-message {
   border-radius: var(--radius-md);
-  border: 1px solid var(--airtable-border);
-  box-shadow: var(--airtable-shadow-hover);
-  font-family: var(--airtable-font);
+  border: 1px solid var(--corp-border);
+  box-shadow: var(--corp-shadow-hover);
+  font-family: var(--corp-font);
 }
 
 /* --- Dropdown --- */
 .el-dropdown-menu {
   border-radius: var(--radius-md);
-  border: 1px solid var(--airtable-border);
-  box-shadow: var(--airtable-shadow-hover);
+  border: 1px solid var(--corp-border);
+  box-shadow: var(--corp-shadow-hover);
 }
 
 .el-dropdown-menu__item {
-  font-family: var(--airtable-font);
+  font-family: var(--corp-font);
   border-radius: var(--radius-sm);
   font-size: 14px;
 }
 
 .el-dropdown-menu__item:hover {
-  background: var(--airtable-surface);
-  color: var(--airtable-text-primary);
+  background: var(--corp-blue-bg);
+  color: var(--corp-blue);
 }
 
 /* --- Tabs --- */
 .el-tabs__item {
-  font-family: var(--airtable-font);
+  font-family: var(--corp-font);
   font-weight: 500;
   font-size: 14px;
-  color: var(--airtable-text-secondary);
-  letter-spacing: 0.01em;
+  color: var(--corp-text-secondary);
 }
 
 .el-tabs__item.is-active {
-  color: var(--airtable-blue);
+  color: var(--corp-blue);
   font-weight: 700;
 }
 
 .el-tabs__active-bar {
-  background-color: var(--airtable-blue);
+  background-color: var(--corp-blue);
   height: 2px;
 }
 
 /* --- Tag / Badge --- */
 .el-tag {
   border-radius: var(--radius-pill);
-  font-family: var(--airtable-font);
+  font-family: var(--corp-font);
   font-weight: 600;
   font-size: 11px;
-  letter-spacing: 0.04em;
   border: none;
   padding: 2px 8px;
 }
@@ -496,167 +482,20 @@ a:hover {
 /* --- Tooltip --- */
 .el-popper.is-dark {
   border-radius: var(--radius-sm);
-  box-shadow: var(--airtable-shadow-card);
-  font-family: var(--airtable-font);
-  font-size: 13px;
+  box-shadow: var(--corp-shadow-card);
+  font-family: var(--corp-font);
 }
 
-/* --- Popover --- */
-.el-popover.el-popper {
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--airtable-border);
-  box-shadow: var(--airtable-shadow-hover);
-  font-family: var(--airtable-font);
-}
-
-/* --- Loading --- */
-.el-loading-mask {
-  background: rgba(255, 255, 255, 0.9);
-}
-
-/* --- Empty --- */
-.el-empty__description {
-  color: var(--airtable-text-muted);
-  font-family: var(--airtable-font);
-  font-size: 14px;
-}
-
-/* --- Form divider --- */
+/* --- Divider --- */
 .el-divider {
-  border-color: var(--airtable-border);
-  margin: 20px 0 16px;
+  border-color: var(--corp-border);
 }
 
 .el-divider__text {
-  font-weight: 700;
+  color: var(--corp-text-muted);
   font-size: 12px;
-  color: var(--airtable-text-secondary);
-  letter-spacing: 0.06em;
+  font-weight: 600;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  background: transparent;
-}
-
-/* ============================================================
-   Batch Action Bar — Floating Bottom Bar
-   ============================================================ */
-.batch-action-bar {
-  position: fixed;
-  bottom: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: var(--airtable-navy);
-  border-radius: var(--radius-lg);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 8px 32px rgba(0, 0, 0, 0.3),
-    0 16px 48px rgba(45, 127, 249, 0.1);
-  color: white;
-  font-family: var(--airtable-font);
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-  backdrop-filter: blur(8px);
-}
-
-.batch-action-bar__count {
-  background: var(--airtable-blue);
-  color: white;
-  border-radius: var(--radius-pill);
-  padding: 2px 10px;
-  font-size: 13px;
-  font-weight: 700;
-}
-
-.batch-action-bar .el-button {
-  color: white;
-  background: rgba(255, 255, 255, 0.1);
-  border: none;
-  font-family: var(--airtable-font);
-  font-size: 13px;
-  font-weight: 500;
-  border-radius: var(--radius-sm);
-  padding: 6px 12px;
-  height: auto;
-}
-
-.batch-action-bar .el-button:hover {
-  background: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
-  color: white;
-}
-
-.batch-action-bar .el-button--primary {
-  background: var(--airtable-blue);
-  color: white;
-}
-
-.batch-action-bar .el-button--danger {
-  background: var(--airtable-danger);
-  color: white;
-}
-
-/* ============================================================
-   Shared Page Layout
-   ============================================================ */
-.page {
-  padding: 0;
-  max-width: 1200px;
-}
-
-.page .toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-  gap: 16px;
-}
-
-.page .toolbar h2 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--airtable-text-primary);
-  letter-spacing: -0.01em;
-}
-
-.page .filter-bar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 16px;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.page .filter-bar .el-input,
-.page .filter-bar .el-select {
-  --el-input-bg-color: var(--airtable-white);
-}
-
-.page .el-table {
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--airtable-border);
-  overflow: hidden;
-}
-
-.page .el-pagination {
-  margin-top: 20px;
-  justify-content: flex-end;
-}
-
-.page .el-row {
-  margin-bottom: 0;
-}
-
-.page .el-col {
-  padding-bottom: 4px;
-}
-
-.page .el-table--small {
-  border-radius: var(--radius-md);
-  font-size: 13px;
+  background: var(--corp-white);
 }

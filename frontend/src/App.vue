@@ -71,7 +71,7 @@ html, body, #app {
   flex: 1;
   padding: 24px;
   overflow-y: auto;
-  background: var(--airtable-surface);
+  background: var(--corp-bg);
 }
 
 .main-content.full-width {
@@ -89,9 +89,9 @@ html, body, #app {
   gap: 12px;
   padding: 0 12px;
   height: 56px;
-  background: var(--airtable-white);
-  color: var(--airtable-navy);
-  border-bottom: 1px solid var(--airtable-border);
+  background: #1e3a5f;
+  color: #ffffff;
+  border-bottom: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -102,8 +102,8 @@ html, body, #app {
 .mobile-title {
   font-size: 15px;
   font-weight: 700;
-  color: var(--airtable-navy);
-  letter-spacing: -0.01em;
+  color: #ffffff;
+  letter-spacing: 0;
 }
 
 /* 移动端遮罩层 */

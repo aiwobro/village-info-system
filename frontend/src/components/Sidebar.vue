@@ -37,7 +37,12 @@ const handleSelect = () => {
   <!-- 桌面端：固定侧边栏 -->
   <el-aside v-if="!isMobile" :width="isCollapse ? '64px' : '220px'" class="sidebar">
     <div class="logo">
-      <span v-if="!isCollapse" class="logo-text">🏘️ 村庄管理</span>
+      <span v-if="!isCollapse" class="logo-text">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+          <path d="M3 21V9L12 3L21 9V21H15V14H9V21H3Z" fill="white" opacity="0.9"/>
+        </svg>
+        村庄管理
+      </span>
       <span v-else class="logo-icon">🏘️</span>
       <button class="collapse-btn" :class="{ collapsed: isCollapse }" @click="isCollapse = !isCollapse" :title="isCollapse ? '展开侧边栏' : '收起侧边栏'">
         <el-icon><DArrowLeft /></el-icon>
@@ -60,7 +65,10 @@ const handleSelect = () => {
   <el-drawer v-else :model-value="open" direction="ltr" :show-close="false" size="220px" @close="emit('close')" class="mobile-drawer">
     <template #title>
       <div class="logo">
-        <span class="logo-text">🏘️ 村庄管理</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+          <path d="M3 21V9L12 3L21 9V21H15V14H9V21H3Z" fill="white" opacity="0.9"/>
+        </svg>
+        <span class="logo-text">村庄管理</span>
       </div>
     </template>
     <el-menu
@@ -78,15 +86,14 @@ const handleSelect = () => {
 </template>
 
 <style scoped>
-/* ---- Airtable Style Sidebar ---- */
+/* ---- Corporate Deep Blue Sidebar ---- */
 
-/* 桌面端侧边栏 */
 .sidebar {
-  background: var(--airtable-white);
+  background: #1e3a5f;
   height: 100vh;
   transition: width 0.2s ease;
   flex-shrink: 0;
-  border-right: 1px solid var(--airtable-border);
+  border-right: none;
   display: flex;
   flex-direction: column;
 }
@@ -96,8 +103,9 @@ const handleSelect = () => {
   height: 56px;
   display: flex;
   align-items: center;
+  gap: 10px;
   justify-content: center;
-  border-bottom: 1px solid var(--airtable-border);
+  border-bottom: 1px solid rgba(255,255,255,0.1);
   flex-shrink: 0;
   position: relative;
   padding: 0 12px;
@@ -106,9 +114,12 @@ const handleSelect = () => {
 .logo-text {
   font-size: 14px;
   font-weight: 700;
-  color: var(--airtable-navy);
-  letter-spacing: -0.01em;
+  color: #ffffff;
+  letter-spacing: 0;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .logo-icon {
@@ -124,20 +135,20 @@ const handleSelect = () => {
   width: 28px;
   height: 28px;
   border: none;
-  background: transparent;
+  background: rgba(255,255,255,0.1);
   border-radius: var(--radius-sm);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--airtable-text-muted);
+  color: rgba(255,255,255,0.7);
   transition: background 0.15s ease, color 0.15s ease;
   flex-shrink: 0;
 }
 
 .collapse-btn:hover {
-  background: var(--airtable-surface);
-  color: var(--airtable-text-primary);
+  background: rgba(255,255,255,0.2);
+  color: #ffffff;
 }
 
 .collapse-btn .el-icon {
@@ -163,26 +174,25 @@ const handleSelect = () => {
 }
 
 :deep(.el-menu-item) {
-  height: 38px;
-  line-height: 38px;
-  margin: 1px 8px;
+  height: 40px;
+  line-height: 40px;
+  margin: 2px 10px;
   border-radius: var(--radius-sm);
-  color: var(--airtable-text-secondary);
+  color: rgba(255,255,255,0.7);
   font-size: 14px;
   font-weight: 500;
-  letter-spacing: 0.01em;
   transition: background 0.12s ease, color 0.12s ease;
 }
 
 :deep(.el-menu-item:hover) {
-  background: var(--airtable-surface);
-  color: var(--airtable-text-primary);
+  background: rgba(255,255,255,0.1);
+  color: #ffffff;
 }
 
 :deep(.el-menu-item.is-active) {
-  background: rgba(27, 97, 201, 0.1);
-  color: var(--airtable-blue);
-  font-weight: 700;
+  background: rgba(37, 99, 235, 0.6);
+  color: #ffffff;
+  font-weight: 600;
 }
 
 /* 激活态左侧蓝色指示条 */
@@ -193,13 +203,13 @@ const handleSelect = () => {
   top: 50%;
   transform: translateY(-50%);
   width: 3px;
-  height: 20px;
-  background: var(--airtable-blue);
+  height: 24px;
+  background: #60a5fa;
   border-radius: 0 2px 2px 0;
 }
 
 :deep(.el-menu-item .el-icon) {
-  font-size: 15px;
+  font-size: 16px;
 }
 
 /* 折叠状态 */
@@ -208,7 +218,7 @@ const handleSelect = () => {
 }
 
 :deep(.el-menu--collapse .el-menu-item) {
-  margin: 1px 6px;
+  margin: 2px 8px;
   justify-content: center;
 }
 
@@ -217,24 +227,24 @@ const handleSelect = () => {
   height: 56px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  border-bottom: 1px solid var(--airtable-border);
+  gap: 8px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
 }
 
 .mobile-drawer .logo-text {
   font-size: 14px;
   font-weight: 700;
-  color: var(--airtable-navy);
+  color: #ffffff;
 }
 
 :deep(.el-drawer__header) {
   padding: 0;
   margin: 0;
-  background: var(--airtable-white);
+  background: #1e3a5f;
 }
 
 :deep(.el-drawer__body) {
   padding: 0;
-  background: var(--airtable-white);
+  background: #1e3a5f;
 }
 </style>

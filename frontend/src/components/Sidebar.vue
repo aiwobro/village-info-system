@@ -178,38 +178,34 @@ const handleSelect = () => {
   line-height: 40px;
   margin: 2px 10px;
   border-radius: var(--radius-sm);
-  color: rgba(255,255,255,0.7);
+  color: rgba(255,255,255,0.8);
   font-size: 14px;
   font-weight: 500;
   transition: background 0.12s ease, color 0.12s ease;
 }
 
+:deep(.el-menu-item .el-icon) {
+  color: rgba(255,255,255,0.7);
+  font-size: 16px;
+}
+
 :deep(.el-menu-item:hover) {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255,255,255,0.12);
+  color: #ffffff;
+}
+
+:deep(.el-menu-item:hover .el-icon) {
   color: #ffffff;
 }
 
 :deep(.el-menu-item.is-active) {
-  background: rgba(37, 99, 235, 0.6);
+  background: rgba(37, 99, 235, 0.7);
   color: #ffffff;
   font-weight: 600;
 }
 
-/* 激活态左侧蓝色指示条 */
-:deep(.el-menu-item.is-active)::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 3px;
-  height: 24px;
-  background: #60a5fa;
-  border-radius: 0 2px 2px 0;
-}
-
-:deep(.el-menu-item .el-icon) {
-  font-size: 16px;
+:deep(.el-menu-item.is-active .el-icon) {
+  color: #ffffff;
 }
 
 /* 折叠状态 */

@@ -417,7 +417,6 @@ onMounted(async () => {
     <el-table
       :data="list"
       v-loading="loading"
-      stripe
       row-class-name="row-selected"
       @selection-change="handleSelectionChange"
     >
@@ -469,7 +468,7 @@ onMounted(async () => {
 
         <!-- 家庭成员区块 -->
         <el-divider content-position="left">家庭成员</el-divider>
-        <el-table :data="editMembers" size="small" stripe style="margin-bottom: 12px" max-height="250">
+        <el-table :data="editMembers" size="small" style="margin-bottom: 12px" max-height="250">
           <el-table-column prop="name" label="姓名" />
           <el-table-column prop="gender" label="性别" width="60" />
           <el-table-column prop="id_card" label="身份证号" width="180" />
@@ -499,7 +498,7 @@ onMounted(async () => {
     </el-dialog>
 
     <el-dialog v-model="membersDialogVisible" :title="'户 ' + currentHousehold + ' 的成员'" width="700px">
-      <el-table :data="members" v-loading="membersLoading" stripe max-height="400">
+      <el-table :data="members" v-loading="membersLoading" max-height="400">
         <el-table-column prop="name" label="姓名" />
         <el-table-column prop="gender" label="性别" width="60" />
         <el-table-column prop="id_card" label="身份证号" width="180" />

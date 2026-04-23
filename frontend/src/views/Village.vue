@@ -143,7 +143,7 @@ onMounted(fetchList)
       </div>
     </div>
 
-    <el-table :data="list" v-loading="loading" stripe>
+    <el-table :data="list" v-loading="loading">
       <el-table-column prop="name" label="村名" />
       <el-table-column prop="code" label="村庄代码" />
       <el-table-column prop="leader" label="负责人" />
@@ -187,7 +187,7 @@ onMounted(fetchList)
 
         <!-- 下辖自然村区块 -->
         <el-divider content-position="left">下辖自然村</el-divider>
-        <el-table :data="editNaturalVillages" size="small" stripe style="margin-bottom: 12px" max-height="250">
+        <el-table :data="editNaturalVillages" size="small" style="margin-bottom: 12px" max-height="250">
           <el-table-column prop="name" label="名称" />
           <el-table-column prop="leader" label="负责人" />
           <el-table-column prop="phone" label="联系电话" />

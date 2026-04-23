@@ -255,7 +255,7 @@ onMounted(fetchList)
       <el-button type="primary" @click="handleSearch">搜索</el-button>
     </div>
 
-    <el-table :data="list" v-loading="loading" stripe row-class-name="row-selected" @selection-change="handleSelectionChange">
+    <el-table :data="list" v-loading="loading" row-class-name="row-selected" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="40" />
       <el-table-column prop="name" label="资产名称" />
       <el-table-column prop="code" label="编码" />

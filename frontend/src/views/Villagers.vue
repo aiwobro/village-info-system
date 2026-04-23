@@ -364,7 +364,6 @@ onMounted(fetchList)
     <el-table
       :data="list"
       v-loading="loading"
-      stripe
       row-class-name="row-selected"
       @selection-change="handleSelectionChange"
     >
@@ -472,7 +471,7 @@ onMounted(fetchList)
 
         <!-- 联系方式区块 -->
         <el-divider content-position="left">联系方式</el-divider>
-        <el-table :data="editContacts" size="small" stripe style="margin-bottom: 12px">
+        <el-table :data="editContacts" size="small" style="margin-bottom: 12px">
           <el-table-column prop="type" label="类型" width="100" />
           <el-table-column prop="value" label="联系方式" />
           <el-table-column prop="is_primary" label="主联系" width="80">
@@ -496,7 +495,7 @@ onMounted(fetchList)
 
         <!-- 银行账号区块 -->
         <el-divider content-position="left">银行账号</el-divider>
-        <el-table :data="editBanks" size="small" stripe style="margin-bottom: 12px">
+        <el-table :data="editBanks" size="small" style="margin-bottom: 12px">
           <el-table-column prop="bank_name" label="开户行" />
           <el-table-column prop="account_holder" label="开户名" />
           <el-table-column prop="account_number_encrypted" label="卡号" />

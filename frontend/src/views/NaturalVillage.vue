@@ -124,7 +124,7 @@ onMounted(fetchList)
       </div>
     </div>
 
-    <el-table :data="list" v-loading="loading" stripe>
+    <el-table :data="list" v-loading="loading">
       <el-table-column prop="name" label="村名" />
       <el-table-column prop="admin_village_name" label="所属行政村" />
       <el-table-column prop="leader" label="负责人" />

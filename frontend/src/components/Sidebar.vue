@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { DArrowLeft } from '@element-plus/icons-vue'
 
 const props = defineProps<{
   isMobile?: boolean
@@ -38,6 +39,9 @@ const handleSelect = () => {
     <div class="logo">
       <span v-if="!isCollapse" class="logo-text">🏘️ 村庄管理</span>
       <span v-else class="logo-icon">🏘️</span>
+      <button class="collapse-btn" :class="{ collapsed: isCollapse }" @click="isCollapse = !isCollapse" :title="isCollapse ? '展开侧边栏' : '收起侧边栏'">
+        <el-icon><DArrowLeft /></el-icon>
+      </button>
     </div>
     <el-menu
       :default-active="route.path"
@@ -74,15 +78,15 @@ const handleSelect = () => {
 </template>
 
 <style scoped>
-/* ---- Notion Style Sidebar ---- */
+/* ---- Airtable Style Sidebar ---- */
 
 /* 桌面端侧边栏 */
 .sidebar {
-  background: #f6f5f4;
+  background: var(--airtable-white);
   height: 100vh;
   transition: width 0.2s ease;
   flex-shrink: 0;
-  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  border-right: 1px solid var(--airtable-border);
   display: flex;
   flex-direction: column;
 }
@@ -93,20 +97,56 @@ const handleSelect = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--airtable-border);
   flex-shrink: 0;
+  position: relative;
+  padding: 0 12px;
 }
 
 .logo-text {
-  font-size: 15px;
-  font-weight: 600;
-  color: #31302e;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--airtable-navy);
   letter-spacing: -0.01em;
   white-space: nowrap;
 }
 
 .logo-icon {
   font-size: 20px;
+}
+
+/* 折叠按钮 */
+.collapse-btn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--airtable-text-muted);
+  transition: background 0.15s ease, color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.collapse-btn:hover {
+  background: var(--airtable-surface);
+  color: var(--airtable-text-primary);
+}
+
+.collapse-btn .el-icon {
+  font-size: 13px;
+  transition: transform 0.2s ease;
+}
+
+.collapse-btn.collapsed .el-icon {
+  transform: rotate(180deg);
 }
 
 /* 菜单 */
@@ -126,23 +166,23 @@ const handleSelect = () => {
   height: 38px;
   line-height: 38px;
   margin: 1px 8px;
-  border-radius: 6px;
-  color: #31302e;
+  border-radius: var(--radius-sm);
+  color: var(--airtable-text-secondary);
   font-size: 14px;
-  font-weight: 450;
+  font-weight: 500;
+  letter-spacing: 0.01em;
   transition: background 0.12s ease, color 0.12s ease;
 }
 
 :deep(.el-menu-item:hover) {
-  background: rgba(0, 0, 0, 0.06);
-  color: #31302e;
+  background: var(--airtable-surface);
+  color: var(--airtable-text-primary);
 }
 
 :deep(.el-menu-item.is-active) {
-  background: rgba(0, 117, 222, 0.1);
-  color: #0075de;
-  font-weight: 600;
-  position: relative;
+  background: rgba(27, 97, 201, 0.1);
+  color: var(--airtable-blue);
+  font-weight: 700;
 }
 
 /* 激活态左侧蓝色指示条 */
@@ -154,7 +194,7 @@ const handleSelect = () => {
   transform: translateY(-50%);
   width: 3px;
   height: 20px;
-  background: #0075de;
+  background: var(--airtable-blue);
   border-radius: 0 2px 2px 0;
 }
 
@@ -178,23 +218,23 @@ const handleSelect = () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--airtable-border);
 }
 
 .mobile-drawer .logo-text {
-  font-size: 15px;
-  font-weight: 600;
-  color: #31302e;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--airtable-navy);
 }
 
 :deep(.el-drawer__header) {
   padding: 0;
   margin: 0;
-  background: #f6f5f4;
+  background: var(--airtable-white);
 }
 
 :deep(.el-drawer__body) {
   padding: 0;
-  background: #f6f5f4;
+  background: var(--airtable-white);
 }
 </style>

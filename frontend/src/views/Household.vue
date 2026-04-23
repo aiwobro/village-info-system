@@ -45,7 +45,7 @@ const filterSearch = ref('')
 const list = ref<any[]>([])
 const total = ref(0)
 const page = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(10)
 const loading = ref(false)
 const dialogVisible = ref(false)
 const isEdit = ref(false)
@@ -574,8 +574,9 @@ onMounted(async () => {
 .stats-bar {
   display: flex;
   align-items: center;
-  background: #f5f7fa;
-  border-radius: 8px;
+  background: var(--airtable-surface);
+  border: 1px solid var(--airtable-border);
+  border-radius: var(--radius-md);
   padding: 12px 24px;
   margin-bottom: 16px;
   gap: 16px;

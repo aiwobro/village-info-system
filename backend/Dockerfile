@@ -9,11 +9,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # 安装 Python 依赖
-COPY backend/requirements.txt .
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt -i https://mirrors.aliyun.com/pypi/simple/
 
 # 复制代码
-COPY backend/ ./
+COPY ./ ./
 
 # 运行
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

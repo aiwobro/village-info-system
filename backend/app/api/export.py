@@ -38,6 +38,27 @@ def _headers_for(module: str):
     }.get(module, [])
 
 
+def _household_export_data(db: Session, household_id: int):
+    """查询户主姓名、成员数量、所属自然村名称，用于导出"""
+    from sqlalchemy import text
+    row = db.execute(text("""
+        SELECT
+            h.household_no,
+            nv.name as natural_village_name,
+            head.name as head_name,
+            h.address,
+            COUNT(m.id) as member_count,
+            h.is_locked
+        FROM households h
+        LEFT JOIN natural_villages nv ON h.natural_village_id = nv.id
+        LEFT JOIN villagers head ON h.id = head.household_id AND head.relation_to_head = '户主'
+        LEFT JOIN villagers m ON h.id = m.household_id
+        WHERE h.id = :household_id
+        GROUP BY h.id, nv.name, head.name
+    """), {"household_id": household_id}).fetchone()
+    return row
+
+
 def _row_from(module: str, obj: any, db: Session):
     is_locked = "是" if getattr(obj, "is_locked", 0) else "否"
     if module == "villager":
@@ -56,13 +77,15 @@ def _row_from(module: str, obj: any, db: Session):
             is_locked,
         ]
     elif module == "household":
+        # 导出时重新查询 enriched 数据（get_by_id 只返回原始字段）
+        extra = _household_export_data(db, obj.id)
         return [
-            getattr(obj, "household_no", ""),
-            getattr(obj, "natural_village_name", ""),
-            getattr(obj, "head_name", ""),
-            getattr(obj, "address", ""),
-            getattr(obj, "member_count", 0),
-            is_locked,
+            extra.household_no if extra else "",
+            extra.natural_village_name if extra else "",
+            extra.head_name if extra else "",
+            extra.address if extra else "",
+            extra.member_count if extra else 0,
+            "是" if (extra.is_locked if extra else 0) else "否",
         ]
     elif module == "contact":
         v = db.query(villager.model).filter(villager.model.id == obj.villager_id).first()

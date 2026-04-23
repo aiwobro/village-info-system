@@ -127,33 +127,35 @@ onMounted(() => {
 .page-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: rgba(0, 0, 0, 0.95);
-  letter-spacing: -0.02em;
+  color: var(--airtable-text-primary);
+  letter-spacing: -0.025em;
   margin: 0;
 }
 
 .page-subtitle {
   font-size: 14px;
-  color: #615d59;
+  color: var(--airtable-text-secondary);
   margin: 0;
+  font-weight: 500;
 }
 
 .logout-btn {
-  background: rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  color: #31302e;
-  border-radius: 4px;
+  background: var(--airtable-white);
+  border: 1px solid var(--airtable-border);
+  color: var(--airtable-text-secondary);
+  border-radius: var(--radius-sm);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 6px 14px;
   height: auto;
   margin-top: 4px;
+  letter-spacing: 0.02em;
 }
 
 .logout-btn:hover {
-  background: rgba(0, 0, 0, 0.08);
-  border-color: rgba(0, 0, 0, 0.12);
-  color: #31302e;
+  background: var(--airtable-surface);
+  border-color: var(--airtable-border-strong);
+  color: var(--airtable-text-primary);
 }
 
 /* 统计区域 */
@@ -162,10 +164,10 @@ onMounted(() => {
 }
 
 .stats-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #a39e98;
-  letter-spacing: 0.02em;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--airtable-text-muted);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
   margin-bottom: 12px;
 }
@@ -187,24 +189,25 @@ onMounted(() => {
   align-items: center;
   gap: 14px;
   padding: 18px 16px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 1px 8px rgba(0, 0, 0, 0.02);
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  background: var(--airtable-white);
+  border: 1px solid var(--airtable-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--airtable-shadow-card);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
   min-height: 80px;
 }
 
 .stat-link:hover .stat-card {
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.03);
-  border-color: rgba(0, 0, 0, 0.15);
+  box-shadow: var(--airtable-shadow-hover);
+  border-color: var(--airtable-border-strong);
+  transform: translateY(-2px);
 }
 
 .stat-icon {
-  font-size: 28px;
+  font-size: 26px;
   flex-shrink: 0;
-  color: #0075de;
-  opacity: 0.85;
+  color: var(--airtable-blue);
+  opacity: 0.9;
 }
 
 .stat-info {
@@ -218,13 +221,14 @@ onMounted(() => {
 .stat-value {
   font-size: 26px;
   font-weight: 700;
-  color: rgba(0, 0, 0, 0.95);
-  letter-spacing: -0.02em;
+  color: var(--airtable-text-primary);
+  letter-spacing: -0.025em;
   line-height: 1.1;
+  font-variant-numeric: tabular-nums;
 }
 
 .stat-label {
-  color: #615d59;
+  color: var(--airtable-text-secondary);
   font-size: 13px;
   font-weight: 500;
   white-space: nowrap;

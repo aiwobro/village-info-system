@@ -39,7 +39,7 @@ const handleLogin = async () => {
       </div>
 
       <!-- Form -->
-      <el-form @submit.prevent="handleLogin" class="login-form">
+      <el-form class="login-form">
         <el-form-item>
           <el-input
             v-model="form.username"
@@ -63,8 +63,8 @@ const handleLogin = async () => {
             type="primary"
             size="large"
             :loading="loading"
-            native-type="submit"
             class="login-btn"
+            @click="handleLogin"
           >
             登录
           </el-button>
@@ -82,20 +82,17 @@ const handleLogin = async () => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f6f5f4;
+  background: var(--airtable-surface);
   padding: 24px;
 }
 
 .login-card {
   width: 100%;
   max-width: 380px;
-  background: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  border-radius: 12px;
-  box-shadow:
-    0 4px 18px rgba(0, 0, 0, 0.04),
-    0 2px 6px rgba(0, 0, 0, 0.025),
-    0 0.5px 2px rgba(0, 0, 0, 0.015);
+  background: var(--airtable-white);
+  border: 1px solid var(--airtable-border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--airtable-shadow-hover);
   padding: 40px 36px;
 }
 
@@ -114,15 +111,16 @@ const handleLogin = async () => {
 .login-title {
   font-size: 1.4rem;
   font-weight: 700;
-  color: rgba(0, 0, 0, 0.95);
-  letter-spacing: -0.02em;
+  color: var(--airtable-navy);
+  letter-spacing: -0.025em;
   margin: 0 0 8px;
 }
 
 .login-subtitle {
   font-size: 14px;
-  color: #a39e98;
+  color: var(--airtable-text-muted);
   margin: 0;
+  font-weight: 500;
 }
 
 /* Form */
@@ -134,34 +132,35 @@ const handleLogin = async () => {
   margin-bottom: 16px;
 }
 
-/* Notion-style input override */
+/* Airtable-style input override */
 .login-form :deep(.el-input__wrapper) {
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 4px 12px;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.1) !important;
-  background: #ffffff;
+  box-shadow: 0 0 0 1px var(--airtable-border) !important;
+  background: var(--airtable-white);
 }
 
 .login-form :deep(.el-input__wrapper:hover) {
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2) !important;
+  box-shadow: 0 0 0 1px var(--airtable-border-strong) !important;
 }
 
 .login-form :deep(.el-input__wrapper.is-focus) {
-  box-shadow: 0 0 0 2px #097fe8 !important;
+  box-shadow: 0 0 0 2px var(--airtable-focus) !important;
 }
 
 .login-form :deep(.el-input__inner) {
-  font-family: 'Inter', system-ui, sans-serif;
-  font-size: 15px;
-  color: rgba(0, 0, 0, 0.95);
+  font-family: var(--airtable-font);
+  font-size: 14px;
+  color: var(--airtable-text-primary);
+  letter-spacing: 0.01em;
 }
 
 .login-form :deep(.el-input__inner::placeholder) {
-  color: #a39e98;
+  color: var(--airtable-text-muted);
 }
 
 .login-form :deep(.el-input__prefix .el-icon) {
-  color: #a39e98;
+  color: var(--airtable-text-muted);
 }
 
 /* Login button */
@@ -173,22 +172,23 @@ const handleLogin = async () => {
 .login-btn {
   width: 100%;
   height: 40px;
-  border-radius: 4px;
-  font-size: 15px;
-  font-weight: 600;
-  font-family: 'Inter', system-ui, sans-serif;
-  background: #0075de;
-  border-color: #0075de;
-  letter-spacing: 0;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 700;
+  font-family: var(--airtable-font);
+  background: var(--airtable-blue);
+  border-color: var(--airtable-blue);
+  letter-spacing: 0.02em;
 }
 
 .login-btn:hover {
-  background: #005bab;
-  border-color: #005bab;
-  transform: none;
+  background: var(--airtable-blue-dark);
+  border-color: var(--airtable-blue-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(27, 97, 201, 0.3);
 }
 
 .login-btn:active {
-  transform: scale(0.98);
+  transform: translateY(0);
 }
 </style>

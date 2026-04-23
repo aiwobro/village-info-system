@@ -20,8 +20,8 @@ services:
     image: village-info-system-backend:latest
     container_name: village_backend
     environment:
-      - DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
-      - SECRET_KEY=${BACKEND_SECRET_KEY}
+      - DATABASE_URL=postgresql://villageadmin:village2024@postgres:5432/village_info
+      - SECRET_KEY=your-secret-key-here-change-in-production
       - PROJECT_NAME=VillageInfoSystem
       - API_V1_STR=/api/v1
     ports:

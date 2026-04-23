@@ -55,7 +55,7 @@ const list = ref<any[]>([])
 const households = ref<any[]>([])
 const total = ref(0)
 const page = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(10)
 const search = ref('')
 const loading = ref(false)
 const dialogVisible = ref(false)
@@ -394,7 +394,7 @@ onMounted(fetchList)
       v-model:current-page="page"
       v-model:page-size="pageSize"
       :total="total"
-      :page-sizes="[20, 50, 100]"
+      :page-sizes="[10, 20, 50, 100]"
       layout="total, sizes, prev, pager, next"
       style="margin-top: 16px"
       @current-change="fetchList"
